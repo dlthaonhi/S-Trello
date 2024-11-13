@@ -2,8 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 
 import { verifyJwt } from '../services/jwtService';
 
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user?: string | object;
+  id?: string | null;
 }
 
 const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -18,6 +19,8 @@ const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: NextFun
       return;
     }
     req.user = decoded;
+    req.id = decoded.userId as string;
+    
     next();
   } else {
     res.sendStatus(401);
