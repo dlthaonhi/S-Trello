@@ -3,6 +3,7 @@ import authRouter from "./api/auth/auth.router";
 import dataSource from "./config/typeorm.config";
 import { pino } from "pino";
 import { seedData } from "./config/seeder";
+import userRouter from "./api/user/user.router";
 
 const app: Express = express();
 const port = 3000;
@@ -26,6 +27,7 @@ async function startApp() {
 startApp();
 
 app.use("/auth", authRouter);
+app.use("/user", userRouter);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);

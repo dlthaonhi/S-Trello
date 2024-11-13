@@ -44,11 +44,30 @@ export const userRepository = dataSource.getRepository(Users).extend({
     if (!user) {
       throw new Error("Users not found");
     }
-    const updatedUser = { ...user, ...updateData };
-    
-    await this.save(updatedUser);
+    const updatedUser = this.merge(user, updateData);    
+    try {
+      await this.save(updatedUser);
+    } catch (error) {
+      console.error("Error saving updated user:", error);
+      throw new Error("Error saving updated user");
+    }
 
     return this.findOneBy({ email });
+  },
+
+  async updateUserByIdAsync(
+    id: string,
+    updateData: Partial<Users>
+  ): Promise<Users | null> {
+    const user = await this.findOne({
+      where: { id: id }
+    });
+    if (!user) {
+      throw new Error("Users not found");
+    }
+    const updatedUser = this.merge(user, updateData);    
+    await this.save(updatedUser);
+    return this.findOneBy({ id });
   },
 
   async updateUserRoleAsync(

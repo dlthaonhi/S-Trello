@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-
 import { Users } from "../../model/users.entity";
 import { userRepository } from "../../api/user/userRepository";
 import {
@@ -256,7 +255,6 @@ export const authService = {
       }
       const email:string = decoded.email;    
 
-      //Cập nhật isActivated trong database
       const updatedUser = await userRepository.updateUserByEmailAsync(email, {isActivated: 1});
       if (!updatedUser) {
         return new ServiceResponse(
