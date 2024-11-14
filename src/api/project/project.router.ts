@@ -8,4 +8,6 @@ projectRouter.post("/create", authenticateJWT, ProjectController.createProject);
 projectRouter.put("/update/:projectId", authenticateJWT, ProjectController.updateProject);
 projectRouter.patch("/archive/:projectId", authenticateJWT, ProjectController.archiveProject);
 
+projectRouter.post("/member/:projectId", ProjectController.addMember);
+
 export default projectRouter;

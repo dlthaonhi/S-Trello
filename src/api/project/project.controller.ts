@@ -56,4 +56,22 @@ export const ProjectController = {
       });
     }
   },
+  async addMember (req: AuthenticatedRequest, res: Response) {
+    // const userId:string | any = req.id;  // for notification api
+    const projectId: string | any = req.params.projectId; 
+    const userIds: string[] | string = req.body.userId;  
+    
+    try {
+      const serviceResponse = await ProjectService.addMembers(projectId, userIds);
+      handleServiceResponse(serviceResponse, res);      
+    } catch (error) {
+      const errorMessage = `Error adding member(s): ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  },
+
 };
