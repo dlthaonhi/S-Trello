@@ -7,6 +7,7 @@ import { UserService } from "./user.service";
 import { Users } from "../../model/users.entity";
 
 export const UserController = {
+  
   async updateUser(req: AuthenticatedRequest, res: Response) {
     const userId:string | any = req.id;    
     const newData: Users = req.body;

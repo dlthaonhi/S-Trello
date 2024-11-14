@@ -11,6 +11,7 @@ import { DateTimeEntity } from "../base/datetime.entity";
 import { projectMembers } from "./projectMembers.entity";
 import { CardMembers } from "./cardMembers.entity";
 import { Boards } from "./boards.entity";
+import { Users } from "../users.entity";
 
 @Entity()
 export class Projects extends DateTimeEntity {
@@ -23,8 +24,8 @@ export class Projects extends DateTimeEntity {
   @Column({ type: "varchar", length: 255 })
   public description: string;
 
-  @Column({ type: "varchar", length: 255, nullable: true })
-  public assigned: string;
+  @ManyToOne(() => Users, (user) => user.projects)
+    user: Users
 
   @Column({ type: "boolean", default: false })
   public is_archive: boolean;

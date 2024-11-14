@@ -11,6 +11,8 @@ import { Login, Token } from "../auth/auth.interface";
 import { calculateUnixTime } from "../../services/caculateDatetime";
 import mailService from "../../services/sendEmail";
 import { verify } from "crypto";
+import { cache } from "../../services/cache";
+import { DateTimeEntity } from "@/model/base/datetime.entity";
 
 export const authService = {
   // Register new user
@@ -133,15 +135,28 @@ export const authService = {
 
   getUser: async (userId: string): Promise<ServiceResponse<Users | null>> => {
     try {
-      const user = await userRepository.findByIdAsync(userId);
-      if (!user) {
-        return new ServiceResponse(
-          ResponseStatus.Failed,
-          "User not found",
-          null,
-          StatusCodes.NOT_FOUND
-        );
+      const key = 'cache-key';
+      let startTime = performance.now();
+      let user:Users | null = await cache.get(key);
+      
+      if(!user) {
+        console.log("Cache miss. Find in DB");
+        const userDB = await userRepository.findByIdAsync(userId);
+        if (!userDB) {
+          return new ServiceResponse(
+            ResponseStatus.Failed,
+            "UserID: not found",
+            null,
+            StatusCodes.BAD_REQUEST
+          );
+        }
+        user = await cache.set(key, userDB , 60000);       
       }
+      else console.log("Cache hit");
+      
+      let endTime = performance.now();
+      console.log("Time", (endTime-startTime).toFixed(3));
+      
 
       return new ServiceResponse<Users>(
         ResponseStatus.Success,
