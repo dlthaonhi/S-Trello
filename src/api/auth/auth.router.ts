@@ -5,7 +5,7 @@ const authRouter = Router();
 
 authRouter.post("/register", AuthController.register);
 authRouter.post("/login", AuthController.login);
-authRouter.get("/user/:id", AuthController.getUser);
+// authRouter.get("/user/:id", AuthController.getUser);
 // authRouter.get("/user/:id", canAccessBy(['read']), AuthController.getUser);
 // authRouter.put("/userroles/:id", AuthController.updateRoleUser);
 

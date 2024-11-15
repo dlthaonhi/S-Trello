@@ -9,8 +9,6 @@ import { userRepository } from "../../api/user/userRepository";
 export const UserService = {
   updateUser: async (userId: string, newData: Users): Promise<ServiceResponse<Users | null>> => {
     try {
-
-
       const user = await userRepository.findByIdAsync(userId);
       if (!user) {
         return new ServiceResponse(

@@ -6,6 +6,7 @@ import authRouter from "./api/auth/auth.router";
 import userRouter from "./api/user/user.router";
 import projectRouter from "./api/project/project.router";
 
+
 const app: Express = express();
 const port = 3000;
 app.use(express.json());
@@ -30,6 +31,7 @@ startApp();
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/project", projectRouter);
+
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
