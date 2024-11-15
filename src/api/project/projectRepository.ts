@@ -109,8 +109,8 @@ export const projectMemberRepository = dataSource.getRepository(projectMembers).
     return this.findOneBy({ id: id });
   },
 
-  async findByProjectAsync(project: Projects): Promise<projectMembers | null> {
-    return this.findOneBy({ projectID: { id: project.id } });
+  async findByProjectIdAsync(projectId: string): Promise<projectMembers | null> {
+    return this.findOneBy({ projectID: { id: projectId } });
   },
 
   async findByProjectAndRelationAsync(project: Projects, relations: string[]): Promise<projectMembers | null> {
@@ -133,6 +133,14 @@ export const projectMemberRepository = dataSource.getRepository(projectMembers).
   async createManyProjectMembersAsync(memDatas: DeepPartial<projectMembers>[]): Promise<projectMembers[] | null> {
     const newMems = this.create(memDatas);
     return this.save(newMems);
+  },
+
+  async deleteProjectMembersAsync (projectId: string, userId: string): Promise<projectMembers | null> {
+    const removeItem = await this.findOne({
+      where: { projectID: { id: projectId }, userID: { id: userId } },
+    });
+    if(!removeItem) return null;
+    return await this.remove(removeItem);
   },
 
 });

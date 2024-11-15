@@ -252,4 +252,75 @@ export const ProjectService = {
       );
     }
   },
+  removeMembers: async (projectId: string, userIds: string[] | string): Promise<ServiceResponse<projectMembers[] | projectMembers | null>> => {
+    try {
+      const project = await projectMemberRepository.findByProjectIdAsync(projectId);
+      if (!project) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Project ID: not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+
+      let removedMems;
+      if (Array.isArray(userIds)) {
+        let tempMem: projectMembers[] = []
+        for (const userId of userIds) {
+          const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userId)
+          if (existedMem) {
+            const removedUser = await projectMemberRepository.deleteProjectMembersAsync(projectId, userId)
+            if(removedUser) tempMem.push(removedUser);
+          }
+          else console.log(`User with ID ${userId} isn't existed in this project`);           
+        }
+        removedMems = tempMem;
+      }
+      else {
+        const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userIds)
+        if (existedMem) {
+          removedMems = await projectMemberRepository.deleteProjectMembersAsync(projectId, userIds);
+          
+        }
+        else return new ServiceResponse(
+          ResponseStatus.Failed,
+          `Member with ID ${userIds} isn't existed in this project`,
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+       
+      }
+      if ( Array.isArray(removedMems) && !removedMems.length)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "All users isn't existed in this project",
+          null,
+          StatusCodes.BAD_REQUEST
+        ); 
+      if (removedMems === undefined || removedMems === null) 
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error removing member(s) from this project",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        ); 
+
+      return new ServiceResponse<projectMembers[] | projectMembers>(
+        ResponseStatus.Success,
+        "Project member(s) removed successfully!",
+        removedMems,
+        StatusCodes.OK
+      );
+
+    } catch (ex) {
+      const errorMessage = `Error removing member(s): ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
 };

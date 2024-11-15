@@ -73,5 +73,22 @@ export const ProjectController = {
       });
     }
   },
+  async removeMember (req: AuthenticatedRequest, res: Response) {
+    // const userId:string | any = req.id;  // for notification api
+    const projectId: string | any = req.params.projectId; 
+    const userIds: string[] | string = req.body.userId;  
+    
+    try {
+      const serviceResponse = await ProjectService.removeMembers(projectId, userIds);
+      handleServiceResponse(serviceResponse, res);      
+    } catch (error) {
+      const errorMessage = `Error removing member(s): ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  },
 
 };
