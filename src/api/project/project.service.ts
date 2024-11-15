@@ -182,13 +182,13 @@ export const ProjectService = {
               role: RoleType.MEMBER,
               projectID: project
             };
+            
             tempMem.push(addMem);
           }
           else console.log(`Member with ID ${userId} 's existed in this project`);      
           
-          addedMems = await projectMemberRepository.createManyProjectMembersAsync(tempMem);
         }
-        
+        addedMems = await projectMemberRepository.createManyProjectMembersAsync(tempMem); 
       }
       else {
         const user = await userRepository.findByIdAsync(userIds);
