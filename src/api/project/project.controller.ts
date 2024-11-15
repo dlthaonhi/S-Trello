@@ -77,6 +77,7 @@ export const ProjectController = {
     // const userId:string | any = req.id;  // for notification api
     const projectId: string | any = req.params.projectId; 
     const userIds: string[] | string = req.body.userId;  
+    console.log("userIds", userIds);
     
     try {
       const serviceResponse = await ProjectService.removeMembers(projectId, userIds);
