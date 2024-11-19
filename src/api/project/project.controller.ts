@@ -5,13 +5,10 @@ import { handleServiceResponse } from "../../services/httpHandlerResponse";
 import type {AuthenticatedRequest} from "../../middleware/authentication"
 import { ProjectService } from "./project.service";
 import { Projects } from "../../model/projects/projects.entity";
-import { projectRepository } from "./projectRepository";
 import { Boards } from "@/model/projects/boards.entity";
 
 export const ProjectController = {
-  async createProject (req: AuthenticatedRequest, res: Response) {
-    console.log("Vao create");
-    
+  async createProject (req: AuthenticatedRequest, res: Response) {   
     const userId:string | any = req.id;    
     const projectData: Projects = req.body;
     try {
@@ -60,7 +57,14 @@ export const ProjectController = {
   async addMember (req: AuthenticatedRequest, res: Response) {
     // const userId:string | any = req.id;  // for notification api
     const projectId: string | any = req.params.projectId; 
-    const userIds: string[] | string = req.body.userId;  
+    const userId: string[] | string = req.body.userId; 
+    if (userId == undefined || userId == null) return (
+      ResponseStatus.Failed,
+      "Missing some non-nullable field",
+      null,
+      StatusCodes.BAD_REQUEST
+    ); 
+    let userIds:string[] = (typeof(userId) == 'string')? [userId] : userId;
     
     try {
       const serviceResponse = await ProjectService.addMembers(projectId, userIds);
@@ -77,8 +81,14 @@ export const ProjectController = {
   async removeMember (req: AuthenticatedRequest, res: Response) {
     // const userId:string | any = req.id;  // for notification api
     const projectId: string | any = req.params.projectId; 
-    const userIds: string[] | string = req.body.userId;  
-    console.log("userIds", userIds);
+    const userId: string[] | string = req.body.userId; 
+    if (userId == undefined || userId == null) return (
+      ResponseStatus.Failed,
+      "Missing some non-nullable field",
+      null,
+      StatusCodes.BAD_REQUEST
+    ); 
+    let userIds:string[] = (typeof(userId) == 'string')? [userId] : userId;
     
     try {
       const serviceResponse = await ProjectService.removeMembers(projectId, userIds);

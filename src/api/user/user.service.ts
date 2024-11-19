@@ -19,8 +19,7 @@ export const UserService = {
         );
       }
 
-      const updatedUser = await userRepository.updateUserByIdAsync(userId, newData);
-
+      const updatedUser = await userRepository.updateUserByIdAsync(userId, {...user, ...newData});
       if (!updatedUser) {
         return new ServiceResponse(
           ResponseStatus.Failed,

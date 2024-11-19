@@ -1,5 +1,4 @@
 import { Router } from "express";
-// import { canAccessBy } from "../../middleware/checkpermission";
 import { ProjectController } from "./project.controller";
 import authenticateJWT from "@/middleware/authentication";
 import { canAccessProject } from "@/middleware/checkRole";
