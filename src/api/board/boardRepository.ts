@@ -1,0 +1,153 @@
+import { Projects } from "../../model/projects/projects.entity";
+
+import dataSource from "../../config/typeorm.config";
+import { DeepPartial } from "typeorm";
+import { BoardMembers } from "@/model/projects/boardMembers.entity";
+import { Boards } from "@/model/projects/boards.entity";
+
+export const boardRepository = dataSource.getRepository(Boards).extend({
+//   async findAllAsync(): Promise<Projects[]> {
+//     return this.find();
+//   },
+
+//   async findByIdAsync(id: string): Promise<Projects | null> {
+//     return this.findOneBy({ id: id });
+//   },
+
+  async createBoardAsync(boardData: Partial<Boards>): Promise<Boards | null> {
+    const newBoard = this.create({
+      ...boardData,
+    });
+    return this.save(newBoard);
+  },
+
+//   async updateProjectAsync(
+//     id: string,
+//     updateData: Partial<Projects>
+//   ): Promise<Projects | null> {
+//     await this.update(id, updateData);
+//     return this.findOneBy({ id });
+//   },
+
+  //   async updateProjectByEmailAsync(
+  //     email: string,
+  //     updateData: Partial<Projects>
+  //   ): Promise<Projects | null> {
+  //     const project = await this.findOne({
+  //       where: { email: email }
+  //     });
+  //     if (!user) {
+  //       throw new Error("Users not found");
+  //     }
+  //     const updatedUser = this.merge(user, updateData);    
+  //     try {
+  //       await this.save(updatedUser);
+  //     } catch (error) {
+  //       console.error("Error saving updated user:", error);
+  //       throw new Error("Error saving updated user");
+  //     }
+
+  //     return this.findOneBy({ email });
+  //   },
+
+//   async updateProjectByIdAsync(
+//     id: string,
+//     updateData: Partial<Projects>
+//   ): Promise<Projects | null> {
+//     const project = await this.findOne({
+//       where: { id: id }
+//     });
+//     if (!project) {
+//       throw new Error("Projects not found");
+//     }
+//     const updatedProject = this.merge(project, updateData);
+//     await this.save(updatedProject);
+//     return this.findOneBy({ id });
+//   },
+
+  //   async updateUserRoleAsync(
+  //     userId: string,
+  //     roleName: string
+  //   ): Promise<Users | null> {
+  //     const user = await this.findOne({
+  //       where: { id: userId },
+  //       relations: ["roles"],
+  //     });
+  //     if (!user) {
+  //       throw new Error("Users not found");
+  //     }
+  //     // const roleRepository = dataSource.getRepository(Roles);
+  //     // const role = await roleRepository.findOneBy({ name: roleName });
+  //     // if (!role) {
+  //     //   throw new Error(`Roles '${roleName}' not found`);
+  //     // }
+  //     // user.role = [role];
+  //     return this.save(user);
+  //   },
+
+  //   async findByEmailAsync(email: string | undefined): Promise<Users | null> {
+  //     return this.findOneBy({ email });
+  //   },
+  //   async findByIdWithRolesAndPermissions(userId: string): Promise<Users | null> {
+  //     return this.findOne({
+  //       where: { id: userId },
+  //       relations: ["roles", "roles.permissions"],
+  //     });
+  //   },
+
+  //   async createManyUsersAsync(userDatas: DeepPartial<Users>[]): Promise<Users[]> {
+  //     const newUsers = this.create(userDatas);
+  //     return this.save(newUsers);
+  //   },
+});
+
+export const boardMemberRepository = dataSource.getRepository(BoardMembers).extend({
+//   async findAllAsync(): Promise<projectMembers[]> {
+//     return this.find();
+//   },
+
+//   async findAllByProjectIdAsync(projectId: string): Promise<projectMembers[]> {
+//     return this.find({
+//         where: { projectID: { id: projectId }}
+//     });
+// },
+
+//   async findByIdAsync(id: string): Promise<projectMembers | null> {
+//     return this.findOneBy({ id: id });
+//   },
+
+//   async findByProjectIdAsync(projectId: string): Promise<projectMembers | null> {
+//     return this.findOneBy({ projectID: { id: projectId } });
+//   },
+
+//   async findByProjectAndRelationAsync(project: Projects, relations: string[]): Promise<projectMembers | null> {
+//     return this.findOne({
+//       where: { projectID: { id: project.id } },
+//       relations: relations,
+//     });
+//   },
+//   async findByProjectAndUserIdAsync(projectId: string, userId: string): Promise<projectMembers | null> {
+//     return this.findOne({
+//       where: { projectID: { id: projectId }, userID: { id: userId } },
+//     });
+//   },
+
+//   async creatProjectMemberAsync(memData: Partial<projectMembers>): Promise<projectMembers | null> {
+//     const newMem = this.create({ ...memData });
+//     return this.save(newMem);
+//   },
+
+  async createManyProjectMembersAsync(memDatas: DeepPartial<BoardMembers>[]): Promise<BoardMembers[] | null> {
+    const newMems = this.create(memDatas);
+    return this.save(newMems);
+  },
+
+//   async deleteProjectMembersAsync (projectId: string, userId: string): Promise<projectMembers | null> {
+//     const removeItem = await this.findOne({
+//       where: { projectID: { id: projectId }, userID: { id: userId } },
+//     });
+//     if(!removeItem) return null;
+//     return await this.remove(removeItem);
+//   },
+
+});

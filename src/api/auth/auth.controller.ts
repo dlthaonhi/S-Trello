@@ -51,7 +51,7 @@ export const AuthController = {
   async getUser(req: Request, res: Response) {
     const userId = req.params.id;
     try {
-      const serviceResponse = await authService.getUser(userId);
+      const serviceResponse = await authService.getUserRedis(userId);
       handleServiceResponse(serviceResponse, res);
     } catch (error) {
       const errorMessage = `Error getting user: ${(error as Error).message}`;

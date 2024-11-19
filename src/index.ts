@@ -5,6 +5,7 @@ import { seedData } from "./config/seeder";
 import authRouter from "./api/auth/auth.router";
 import userRouter from "./api/user/user.router";
 import projectRouter from "./api/project/project.router";
+import boardRouter from "./api/board/board.router";
 
 
 const app: Express = express();
@@ -31,6 +32,7 @@ startApp();
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/project", projectRouter);
+app.use("/board", boardRouter);
 
 
 app.listen(port, () => {

@@ -13,6 +13,7 @@ import mailService from "../../services/sendEmail";
 import { verify } from "crypto";
 import { cache } from "../../services/cache";
 import { DateTimeEntity } from "@/model/base/datetime.entity";
+import CacheService from "../../services/redis.cache"
 
 export const authService = {
   // Register new user
@@ -135,7 +136,7 @@ export const authService = {
 
   getUser: async (userId: string): Promise<ServiceResponse<Users | null>> => {
     try {
-      const key = 'cache-key';
+      const key = 'user';
       let startTime = performance.now();
       let user:Users | null = await cache.get(key);
       
@@ -165,7 +166,94 @@ export const authService = {
         StatusCodes.OK
       );
     } catch (ex) {
-      const errorMessage = `Error getting user1: ${(ex as Error).message}`;
+      const errorMessage = `Error getting user: ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
+
+  getUserRedis: async (userId: string): Promise<ServiceResponse<Users | null>> => {
+    try {
+      const key = 'users';
+      let startTime = performance.now();
+      let user:Users | null = await CacheService.get(key, userId);
+
+      if(!user) {
+        console.log("Cache miss. Find in DB");
+        const userDB = await userRepository.findByIdAsync(userId);
+        if (!userDB) {
+          return new ServiceResponse(
+            ResponseStatus.Failed,
+            "UserID: not found",
+            null,
+            StatusCodes.BAD_REQUEST
+          );
+        }
+        let setted = await CacheService.set(key, userId , userDB); 
+        user = userDB   
+        console.log(setted);
+           
+      }
+      else console.log("Cache hit");
+      
+      let endTime = performance.now();
+      console.log("Time", (endTime-startTime).toFixed(3));
+      
+
+      return new ServiceResponse<Users>(
+        ResponseStatus.Success,
+        "User found",
+        user,
+        StatusCodes.OK
+      );
+    } catch (ex) {
+      const errorMessage = `Error getting user: ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
+
+  getAllUser: async (userId: string): Promise<ServiceResponse<Users | null>> => {
+    try {
+      const key = 'user-list';
+      let startTime = performance.now();
+      let user:Users | null = await cache.get(key);
+      
+      if(!user) {
+        console.log("Cache miss. Find in DB");
+        const userDB = await userRepository.findByIdAsync(userId);
+        if (!userDB) {
+          return new ServiceResponse(
+            ResponseStatus.Failed,
+            "UserID: not found",
+            null,
+            StatusCodes.BAD_REQUEST
+          );
+        }
+        user = await cache.set(key, userDB , 60000);       
+      }
+      else console.log("Cache hit");
+      
+      let endTime = performance.now();
+      console.log("Time", (endTime-startTime).toFixed(3));
+      
+
+      return new ServiceResponse<Users>(
+        ResponseStatus.Success,
+        "User found",
+        user,
+        StatusCodes.OK
+      );
+    } catch (ex) {
+      const errorMessage = `Error getting user: ${(ex as Error).message}`;
       return new ServiceResponse(
         ResponseStatus.Failed,
         errorMessage,

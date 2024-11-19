@@ -10,7 +10,7 @@ import {
 import { DateTimeEntity } from "../base/datetime.entity";
 import { Cards } from "./cards.entity";
 import { Users } from "../users.entity";
-import { RoleType } from "../base/roleType.entity";
+import { RoleType } from "../base/enumType.entity";
 
 @Entity()
 export class CardMembers extends DateTimeEntity {
