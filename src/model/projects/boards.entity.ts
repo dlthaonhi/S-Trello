@@ -11,6 +11,8 @@ import { DateTimeEntity } from "../base/datetime.entity";
 import { Projects } from "./projects.entity";
 import { Lists } from "./lists.entity";
 import { BoardMembers } from "./boardMembers.entity";
+import { Users } from "../users.entity";
+import {VisibilityType } from "../base/enumType.entity";
 
 @Entity()
 export class Boards extends DateTimeEntity {
@@ -26,8 +28,11 @@ export class Boards extends DateTimeEntity {
   @Column({ type: "varchar", length: 255, nullable: true })
   public coverUrl: string;
 
-  @Column({ type: "varchar", length: 255, nullable: true })
-  public assigned: string;
+  @Column({ type: "enum", enum: VisibilityType, nullable: false})
+  public visibility: VisibilityType;
+
+  @ManyToOne(() => Users, (user) => user.boards)
+  user: Users
 
   @Column({ type: "boolean", default: false })
   public is_archive: boolean;
@@ -35,9 +40,9 @@ export class Boards extends DateTimeEntity {
   @OneToMany(() => Lists, (lists) => lists.boardID)
   lists: Lists[];
 
+  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.boardID)
+  boardMembers: BoardMembers[];
+  
   @ManyToOne(() => Projects, (projects) => projects.boards)
-  projectID: Projects;
-
-  @ManyToOne(() => BoardMembers, (boardMembers) => boardMembers.boardID)
-  boardMembers: BoardMembers;
+  project: Projects;
 }

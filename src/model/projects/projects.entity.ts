@@ -25,7 +25,7 @@ export class Projects extends DateTimeEntity {
   public description: string;
 
   @ManyToOne(() => Users, (user) => user.projects)
-    user: Users
+  user: Users
 
   @Column({ type: "boolean", default: false })
   public is_archive: boolean;
@@ -33,6 +33,6 @@ export class Projects extends DateTimeEntity {
   @OneToMany(() => projectMembers, (projectMembers) => projectMembers.projectID)
   projectMembers: projectMembers[];
 
-  @OneToMany(() => Boards, (boards) => boards.projectID)
+  @OneToMany(() => Boards, (boards) => boards.project)
   boards: Boards[];
 }

@@ -8,9 +8,12 @@ import { userRepository } from "../../api/user/userRepository";
 import { projectRepository, projectMemberRepository } from "../project/projectRepository";
 import { Projects } from "../../model/projects/projects.entity";
 import { projectMembers } from "../../model/projects/projectMembers.entity";
-import { RoleType } from "../../model/base/roleType.entity";
+import { RoleType, VisibilityType } from "../../model/base/enumType.entity";
 import { type } from "os";
 import { IsNull } from "typeorm";
+import { Boards } from "@/model/projects/boards.entity";
+import { BoardMembers } from "@/model/projects/boardMembers.entity";
+import { boardRepository } from "../board/boardRepository";
 
 export const ProjectService = {
   createProject: async (userId: string, projectData: Projects): Promise<ServiceResponse<Projects | null>> => {
@@ -49,7 +52,7 @@ export const ProjectService = {
           StatusCodes.INTERNAL_SERVER_ERROR
         );
       }
-      projectData.projectMembers = [createdMem];
+    //   projectData.projectMembers = [createdMem];
 
       return new ServiceResponse<Projects>(
         ResponseStatus.Success,
@@ -58,7 +61,7 @@ export const ProjectService = {
         StatusCodes.CREATED
       );
     } catch (ex) {
-      const errorMessage = `Error updating users: ${(ex as Error).message}`;
+      const errorMessage = `Error creating project: ${(ex as Error).message}`;
       return new ServiceResponse(
         ResponseStatus.Failed,
         errorMessage,
@@ -231,9 +234,6 @@ export const ProjectService = {
           null,
           StatusCodes.INTERNAL_SERVER_ERROR
         ); 
-      
-
-      
 
       return new ServiceResponse<projectMembers[] | projectMembers>(
         ResponseStatus.Success,
@@ -315,6 +315,91 @@ export const ProjectService = {
 
     } catch (ex) {
       const errorMessage = `Error removing member(s): ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
+  createBoard: async (userId: string, projectId: string, boardData: Boards): Promise<ServiceResponse<Boards | null>> => {
+    try {
+      const user = await userRepository.findByIdAsync(userId);
+      if (!user) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "UserID: Not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      const project = await projectRepository.findByIdAsync(projectId)
+      if (!project) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "ProjectID: Not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      boardData.user = user;
+      boardData.project = project;
+      const createdBoard = await boardRepository.createBoardAsync(boardData);
+      if (!createdBoard) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error creating board",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      if(boardData.visibility === VisibilityType.WORKSPACE){
+        const projectMembers = await projectMemberRepository.findAllByProjectIdAsync(projectId);
+        const boardMembers: Partial<BoardMembers>[] = projectMembers.map(projectMember => {
+            const boardMember: Partial <BoardMembers> = {
+                role: projectMember.role,
+                userID: projectMember.userID,
+                boardID: createdBoard
+            }
+            return boardMember;
+        })
+        const createdMem = await projectMemberRepository.createManyProjectMembersAsync(boardMembers)
+        if (!createdMem) {
+            return new ServiceResponse(
+              ResponseStatus.Failed,
+              "Error creating board members",
+              null,
+              StatusCodes.INTERNAL_SERVER_ERROR
+            );
+          }
+      }
+      else {
+        const adminData = {
+            role: RoleType.ADMIN,
+            userID: user,
+            projectID: project
+        }
+        const createdMem = await projectMemberRepository.creatProjectMemberAsync(adminData);
+        if (!createdMem) {
+            return new ServiceResponse(
+            ResponseStatus.Failed,
+            "Error creating board admin",
+            null,
+            StatusCodes.INTERNAL_SERVER_ERROR
+            );
+        }
+      }
+
+      return new ServiceResponse<Boards>(
+        ResponseStatus.Success,
+        "New board's created successfully!",
+        createdBoard,
+        StatusCodes.CREATED
+      );
+    } catch (ex) {
+      const errorMessage = `Error creating board: ${(ex as Error).message}`;
       return new ServiceResponse(
         ResponseStatus.Failed,
         errorMessage,

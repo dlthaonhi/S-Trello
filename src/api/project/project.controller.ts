@@ -6,6 +6,7 @@ import type {AuthenticatedRequest} from "../../middleware/authentication"
 import { ProjectService } from "./project.service";
 import { Projects } from "../../model/projects/projects.entity";
 import { projectRepository } from "./projectRepository";
+import { Boards } from "@/model/projects/boards.entity";
 
 export const ProjectController = {
   async createProject (req: AuthenticatedRequest, res: Response) {
@@ -84,6 +85,29 @@ export const ProjectController = {
       handleServiceResponse(serviceResponse, res);      
     } catch (error) {
       const errorMessage = `Error removing member(s): ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  },
+  async createBoard (req: AuthenticatedRequest, res: Response) {
+    const userId:string | any = req.id; 
+    const projectId: string | any = req.params.projectId;
+    const boardData: Boards = req.body;
+    if (!boardData.title || !boardData.visibility) return (
+      ResponseStatus.Failed,
+      "Missing some non-nullable field",
+      null,
+      StatusCodes.BAD_REQUEST
+    ); 
+    
+    try {
+      const serviceResponse = await ProjectService.createBoard(userId, projectId, boardData);
+      handleServiceResponse(serviceResponse, res);      
+    } catch (error) {
+      const errorMessage = `Error creating board: ${(error as Error).message}`;
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         status: ResponseStatus.Failed,
         message: errorMessage,

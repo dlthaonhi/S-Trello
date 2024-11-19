@@ -1,9 +1,15 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class  $npmConfigName1731495971190 implements MigrationInterface {
-    name = ' $npmConfigName1731495971190'
+export class  $npmConfigName1731684595023 implements MigrationInterface {
+    name = ' $npmConfigName1731684595023'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`ALTER TABLE \`boards\` DROP FOREIGN KEY \`FK_a18ef38e5a44e510d18d2845e8d\``);
+        await queryRunner.query(`ALTER TABLE \`users\` DROP FOREIGN KEY \`FK_f1ea56a230dc4111559f74f64c5\``);
+        await queryRunner.query(`ALTER TABLE \`users\` DROP COLUMN \`boardMembersId\``);
+        await queryRunner.query(`ALTER TABLE \`board_members\` ADD \`role\` enum ('admin', 'member') NOT NULL DEFAULT 'member'`);
+        await queryRunner.query(`ALTER TABLE \`board_members\` ADD \`userIDId\` varchar(36) NULL`);
+        await queryRunner.query(`ALTER TABLE \`board_members\` ADD \`boardIDId\` varchar(36) NULL`);
         await queryRunner.query(`ALTER TABLE \`card_members\` DROP FOREIGN KEY \`FK_e635eb7677b92b43c746afb0c33\``);
         await queryRunner.query(`ALTER TABLE \`card_members\` DROP FOREIGN KEY \`FK_060d5839fbc02bdca25f57a2206\``);
         await queryRunner.query(`ALTER TABLE \`card_members\` CHANGE \`cardIDId\` \`cardIDId\` varchar(36) NULL`);
@@ -20,13 +26,11 @@ export class  $npmConfigName1731495971190 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE \`cards\` CHANGE \`listIDId\` \`listIDId\` varchar(36) NULL`);
         await queryRunner.query(`ALTER TABLE \`lists\` DROP FOREIGN KEY \`FK_35ce69b6248c3fdac997094de16\``);
         await queryRunner.query(`ALTER TABLE \`lists\` CHANGE \`boardIDId\` \`boardIDId\` varchar(36) NULL`);
-        await queryRunner.query(`ALTER TABLE \`boards\` DROP FOREIGN KEY \`FK_a18ef38e5a44e510d18d2845e8d\``);
-        await queryRunner.query(`ALTER TABLE \`boards\` DROP FOREIGN KEY \`FK_aa2621c1c7f36b4bb38945f8d8c\``);
+        await queryRunner.query(`ALTER TABLE \`boards\` DROP FOREIGN KEY \`FK_1ce74d5411749b559748b9f3276\``);
         await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`description\` \`description\` varchar(255) NULL`);
         await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`coverUrl\` \`coverUrl\` varchar(255) NULL`);
-        await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`assigned\` \`assigned\` varchar(255) NULL`);
-        await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`projectIDId\` \`projectIDId\` varchar(36) NULL`);
-        await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`boardMembersId\` \`boardMembersId\` varchar(36) NULL`);
+        await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`userId\` \`userId\` varchar(36) NULL`);
+        await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`projectId\` \`projectId\` varchar(36) NULL`);
         await queryRunner.query(`ALTER TABLE \`projects\` DROP FOREIGN KEY \`FK_361a53ae58ef7034adc3c06f09f\``);
         await queryRunner.query(`ALTER TABLE \`projects\` CHANGE \`userId\` \`userId\` varchar(36) NULL`);
         await queryRunner.query(`ALTER TABLE \`project_members\` DROP FOREIGN KEY \`FK_24cae15cf042f411ce2ccae3c1f\``);
@@ -37,7 +41,6 @@ export class  $npmConfigName1731495971190 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE \`notifications\` DROP COLUMN \`data\``);
         await queryRunner.query(`ALTER TABLE \`notifications\` ADD \`data\` json NULL`);
         await queryRunner.query(`ALTER TABLE \`notifications\` CHANGE \`userIDId\` \`userIDId\` varchar(36) NULL`);
-        await queryRunner.query(`ALTER TABLE \`users\` DROP FOREIGN KEY \`FK_f1ea56a230dc4111559f74f64c5\``);
         await queryRunner.query(`ALTER TABLE \`users\` DROP FOREIGN KEY \`FK_ae2afa612c84f4eb307d6c652be\``);
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`bio\` \`bio\` varchar(255) NULL`);
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`avatarUrl\` \`avatarUrl\` varchar(255) NULL`);
@@ -45,7 +48,6 @@ export class  $npmConfigName1731495971190 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`accessTokenExpiresAt\` \`accessTokenExpiresAt\` datetime NULL`);
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`refreshToken\` \`refreshToken\` varchar(255) NULL`);
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`refreshTokenExpiresAt\` \`refreshTokenExpiresAt\` datetime NULL`);
-        await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`boardMembersId\` \`boardMembersId\` varchar(36) NULL`);
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`cardMembersId\` \`cardMembersId\` varchar(36) NULL`);
         await queryRunner.query(`ALTER TABLE \`card_members\` ADD CONSTRAINT \`FK_e635eb7677b92b43c746afb0c33\` FOREIGN KEY (\`cardIDId\`) REFERENCES \`cards\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`card_members\` ADD CONSTRAINT \`FK_060d5839fbc02bdca25f57a2206\` FOREIGN KEY (\`userIDId\`) REFERENCES \`users\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
@@ -53,25 +55,27 @@ export class  $npmConfigName1731495971190 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE \`comments\` ADD CONSTRAINT \`FK_b202e040bcab8687fa432628fba\` FOREIGN KEY (\`cardIDId\`) REFERENCES \`cards\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`cards\` ADD CONSTRAINT \`FK_2cc808bbdb6f4e1169a8916d0a6\` FOREIGN KEY (\`listIDId\`) REFERENCES \`lists\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`lists\` ADD CONSTRAINT \`FK_35ce69b6248c3fdac997094de16\` FOREIGN KEY (\`boardIDId\`) REFERENCES \`boards\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE \`boards\` ADD CONSTRAINT \`FK_a18ef38e5a44e510d18d2845e8d\` FOREIGN KEY (\`projectIDId\`) REFERENCES \`projects\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE \`boards\` ADD CONSTRAINT \`FK_aa2621c1c7f36b4bb38945f8d8c\` FOREIGN KEY (\`boardMembersId\`) REFERENCES \`board_members\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE \`board_members\` ADD CONSTRAINT \`FK_1c326eec837722d2e0879a348cc\` FOREIGN KEY (\`userIDId\`) REFERENCES \`users\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE \`board_members\` ADD CONSTRAINT \`FK_cac1b90399803e9ec4a5e6e52a1\` FOREIGN KEY (\`boardIDId\`) REFERENCES \`boards\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE \`boards\` ADD CONSTRAINT \`FK_1ce74d5411749b559748b9f3276\` FOREIGN KEY (\`userId\`) REFERENCES \`users\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE \`boards\` ADD CONSTRAINT \`FK_074efe1a079786d8c076bf00fff\` FOREIGN KEY (\`projectId\`) REFERENCES \`projects\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`projects\` ADD CONSTRAINT \`FK_361a53ae58ef7034adc3c06f09f\` FOREIGN KEY (\`userId\`) REFERENCES \`users\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`project_members\` ADD CONSTRAINT \`FK_24cae15cf042f411ce2ccae3c1f\` FOREIGN KEY (\`userIDId\`) REFERENCES \`users\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`project_members\` ADD CONSTRAINT \`FK_d8433ad1d7964e95ddad79d2cfe\` FOREIGN KEY (\`projectIDId\`) REFERENCES \`projects\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`notifications\` ADD CONSTRAINT \`FK_554429ae7394b1fd4f26f45a623\` FOREIGN KEY (\`userIDId\`) REFERENCES \`users\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE \`users\` ADD CONSTRAINT \`FK_f1ea56a230dc4111559f74f64c5\` FOREIGN KEY (\`boardMembersId\`) REFERENCES \`board_members\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`users\` ADD CONSTRAINT \`FK_ae2afa612c84f4eb307d6c652be\` FOREIGN KEY (\`cardMembersId\`) REFERENCES \`card_members\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`ALTER TABLE \`users\` DROP FOREIGN KEY \`FK_ae2afa612c84f4eb307d6c652be\``);
-        await queryRunner.query(`ALTER TABLE \`users\` DROP FOREIGN KEY \`FK_f1ea56a230dc4111559f74f64c5\``);
         await queryRunner.query(`ALTER TABLE \`notifications\` DROP FOREIGN KEY \`FK_554429ae7394b1fd4f26f45a623\``);
         await queryRunner.query(`ALTER TABLE \`project_members\` DROP FOREIGN KEY \`FK_d8433ad1d7964e95ddad79d2cfe\``);
         await queryRunner.query(`ALTER TABLE \`project_members\` DROP FOREIGN KEY \`FK_24cae15cf042f411ce2ccae3c1f\``);
         await queryRunner.query(`ALTER TABLE \`projects\` DROP FOREIGN KEY \`FK_361a53ae58ef7034adc3c06f09f\``);
-        await queryRunner.query(`ALTER TABLE \`boards\` DROP FOREIGN KEY \`FK_aa2621c1c7f36b4bb38945f8d8c\``);
-        await queryRunner.query(`ALTER TABLE \`boards\` DROP FOREIGN KEY \`FK_a18ef38e5a44e510d18d2845e8d\``);
+        await queryRunner.query(`ALTER TABLE \`boards\` DROP FOREIGN KEY \`FK_074efe1a079786d8c076bf00fff\``);
+        await queryRunner.query(`ALTER TABLE \`boards\` DROP FOREIGN KEY \`FK_1ce74d5411749b559748b9f3276\``);
+        await queryRunner.query(`ALTER TABLE \`board_members\` DROP FOREIGN KEY \`FK_cac1b90399803e9ec4a5e6e52a1\``);
+        await queryRunner.query(`ALTER TABLE \`board_members\` DROP FOREIGN KEY \`FK_1c326eec837722d2e0879a348cc\``);
         await queryRunner.query(`ALTER TABLE \`lists\` DROP FOREIGN KEY \`FK_35ce69b6248c3fdac997094de16\``);
         await queryRunner.query(`ALTER TABLE \`cards\` DROP FOREIGN KEY \`FK_2cc808bbdb6f4e1169a8916d0a6\``);
         await queryRunner.query(`ALTER TABLE \`comments\` DROP FOREIGN KEY \`FK_b202e040bcab8687fa432628fba\``);
@@ -79,7 +83,6 @@ export class  $npmConfigName1731495971190 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE \`card_members\` DROP FOREIGN KEY \`FK_060d5839fbc02bdca25f57a2206\``);
         await queryRunner.query(`ALTER TABLE \`card_members\` DROP FOREIGN KEY \`FK_e635eb7677b92b43c746afb0c33\``);
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`cardMembersId\` \`cardMembersId\` varchar(36) NULL DEFAULT 'NULL'`);
-        await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`boardMembersId\` \`boardMembersId\` varchar(36) NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`refreshTokenExpiresAt\` \`refreshTokenExpiresAt\` datetime NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`refreshToken\` \`refreshToken\` varchar(255) NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`accessTokenExpiresAt\` \`accessTokenExpiresAt\` datetime NULL DEFAULT 'NULL'`);
@@ -87,7 +90,6 @@ export class  $npmConfigName1731495971190 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`avatarUrl\` \`avatarUrl\` varchar(255) NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`users\` CHANGE \`bio\` \`bio\` varchar(255) NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`users\` ADD CONSTRAINT \`FK_ae2afa612c84f4eb307d6c652be\` FOREIGN KEY (\`cardMembersId\`) REFERENCES \`card_members\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE \`users\` ADD CONSTRAINT \`FK_f1ea56a230dc4111559f74f64c5\` FOREIGN KEY (\`boardMembersId\`) REFERENCES \`board_members\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`notifications\` CHANGE \`userIDId\` \`userIDId\` varchar(36) NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`notifications\` DROP COLUMN \`data\``);
         await queryRunner.query(`ALTER TABLE \`notifications\` ADD \`data\` longtext COLLATE "utf8mb4_bin" NULL DEFAULT 'NULL'`);
@@ -98,13 +100,11 @@ export class  $npmConfigName1731495971190 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE \`project_members\` ADD CONSTRAINT \`FK_24cae15cf042f411ce2ccae3c1f\` FOREIGN KEY (\`userIDId\`) REFERENCES \`users\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`projects\` CHANGE \`userId\` \`userId\` varchar(36) NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`projects\` ADD CONSTRAINT \`FK_361a53ae58ef7034adc3c06f09f\` FOREIGN KEY (\`userId\`) REFERENCES \`users\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`boardMembersId\` \`boardMembersId\` varchar(36) NULL DEFAULT 'NULL'`);
-        await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`projectIDId\` \`projectIDId\` varchar(36) NULL DEFAULT 'NULL'`);
-        await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`assigned\` \`assigned\` varchar(255) NULL DEFAULT 'NULL'`);
+        await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`projectId\` \`projectId\` varchar(36) NULL DEFAULT 'NULL'`);
+        await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`userId\` \`userId\` varchar(36) NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`coverUrl\` \`coverUrl\` varchar(255) NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`boards\` CHANGE \`description\` \`description\` varchar(255) NULL DEFAULT 'NULL'`);
-        await queryRunner.query(`ALTER TABLE \`boards\` ADD CONSTRAINT \`FK_aa2621c1c7f36b4bb38945f8d8c\` FOREIGN KEY (\`boardMembersId\`) REFERENCES \`board_members\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE \`boards\` ADD CONSTRAINT \`FK_a18ef38e5a44e510d18d2845e8d\` FOREIGN KEY (\`projectIDId\`) REFERENCES \`projects\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE \`boards\` ADD CONSTRAINT \`FK_1ce74d5411749b559748b9f3276\` FOREIGN KEY (\`userId\`) REFERENCES \`users\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`lists\` CHANGE \`boardIDId\` \`boardIDId\` varchar(36) NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`lists\` ADD CONSTRAINT \`FK_35ce69b6248c3fdac997094de16\` FOREIGN KEY (\`boardIDId\`) REFERENCES \`boards\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`cards\` CHANGE \`listIDId\` \`listIDId\` varchar(36) NULL DEFAULT 'NULL'`);
@@ -121,6 +121,12 @@ export class  $npmConfigName1731495971190 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE \`card_members\` CHANGE \`cardIDId\` \`cardIDId\` varchar(36) NULL DEFAULT 'NULL'`);
         await queryRunner.query(`ALTER TABLE \`card_members\` ADD CONSTRAINT \`FK_060d5839fbc02bdca25f57a2206\` FOREIGN KEY (\`userIDId\`) REFERENCES \`users\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE \`card_members\` ADD CONSTRAINT \`FK_e635eb7677b92b43c746afb0c33\` FOREIGN KEY (\`cardIDId\`) REFERENCES \`cards\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE \`board_members\` DROP COLUMN \`boardIDId\``);
+        await queryRunner.query(`ALTER TABLE \`board_members\` DROP COLUMN \`userIDId\``);
+        await queryRunner.query(`ALTER TABLE \`board_members\` DROP COLUMN \`role\``);
+        await queryRunner.query(`ALTER TABLE \`users\` ADD \`boardMembersId\` varchar(36) NULL DEFAULT 'NULL'`);
+        await queryRunner.query(`ALTER TABLE \`users\` ADD CONSTRAINT \`FK_f1ea56a230dc4111559f74f64c5\` FOREIGN KEY (\`boardMembersId\`) REFERENCES \`board_members\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE \`boards\` ADD CONSTRAINT \`FK_a18ef38e5a44e510d18d2845e8d\` FOREIGN KEY (\`projectId\`) REFERENCES \`projects\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`);
     }
 
 }

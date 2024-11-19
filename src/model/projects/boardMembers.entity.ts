@@ -6,10 +6,12 @@ import {
   ManyToOne,
   Int32,
   ManyToMany,
+  RoleSpecification,
 } from "typeorm";
 import { DateTimeEntity } from "../base/datetime.entity";
 import { Users } from "../users.entity";
 import { Boards } from "./boards.entity";
+import { RoleType } from "../base/enumType.entity";
 
 
 
@@ -18,10 +20,13 @@ export class BoardMembers extends DateTimeEntity {
   @PrimaryGeneratedColumn("uuid")
   public id: string;
 
-  @OneToMany(() => Users, (users) => users.boardMembers)
-    userID: Users[];
+  @Column({ type: "enum", enum: RoleType, default: RoleType.MEMBER })
+  public role: RoleType;
+
+  @ManyToOne(() => Users, (users) => users.boardMembers)
+  userID: Users;
   
-    @OneToMany(() => Boards, (boards) => boards.boardMembers)
-    boardID: Boards[];
-  
+  @ManyToOne(() => Boards, (boards) => boards.boardMembers)
+  boardID: Boards;
+
 }
