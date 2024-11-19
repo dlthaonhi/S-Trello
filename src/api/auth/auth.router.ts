@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { AuthController } from "../auth/auth.controller";
-import { canAccessBy } from "../../middleware/checkpermission";
+// import { canAccessBy } from "../../middleware/checkpermission";
 const authRouter = Router();
 
 authRouter.post("/register", AuthController.register);

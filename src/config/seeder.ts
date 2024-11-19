@@ -27,6 +27,7 @@ export async function seedData(dataSource: DataSource) {
   // const createdPermissions = await permissionRepository.save(permissions);
 
     //create Users
+    
     const users: Users[] = [];
     for (let i = 0; i < 3; i++) {
       const existedEmail = await userRepository.findByEmailAsync(`user${i}@gmail.com`);

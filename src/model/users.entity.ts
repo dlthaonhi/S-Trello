@@ -14,6 +14,7 @@ import { Notifications } from "./projects/notifications.entity";
 import { Roles } from "./roles.entity";
 import { BoardMembers } from "./projects/boardMembers.entity";
 import { CardMembers } from "./projects/cardMembers.entity";
+import { Projects } from "./projects/projects.entity";
 
 @Entity()
 export class Users extends DateTimeEntity {
@@ -52,6 +53,9 @@ export class Users extends DateTimeEntity {
 
   @Column({ type: "datetime", nullable: true })
   public refreshTokenExpiresAt: Date;
+
+  @OneToMany(() => Projects, (project) => project.user, {cascade: true})
+    projects: Projects[];
 
   @OneToMany(() => projectMembers, (projectMembers) => projectMembers.userID, {
     cascade: true,
