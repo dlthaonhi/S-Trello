@@ -13,7 +13,7 @@ import { type } from "os";
 import { IsNull } from "typeorm";
 import { Boards } from "@/model/projects/boards.entity";
 import { BoardMembers } from "@/model/projects/boardMembers.entity";
-import { boardRepository } from "../board/boardRepository";
+import { boardMemberRepository, boardRepository } from "../board/boardRepository";
 
 export const ProjectService = {
   createProject: async (userId: string, projectData: Projects): Promise<ServiceResponse<Projects | null>> => {
@@ -52,7 +52,6 @@ export const ProjectService = {
           StatusCodes.INTERNAL_SERVER_ERROR
         );
       }
-    //   projectData.projectMembers = [createdMem];
 
       return new ServiceResponse<Projects>(
         ResponseStatus.Success,
@@ -73,7 +72,6 @@ export const ProjectService = {
   updateProject: async (projectId: string, newData: Partial<Projects>): Promise<ServiceResponse<Projects | null>> => {
     try {
       const project = await projectRepository.findByIdAsync(projectId);
-
       if (!project) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -83,8 +81,7 @@ export const ProjectService = {
         );
       }
 
-      const updatedProject = await projectRepository.updateProjectByIdAsync(projectId, newData);
-
+      const updatedProject = await projectRepository.updateProjectByIdAsync(projectId, { ...project, ...newData });
       if (!updatedProject) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -113,7 +110,6 @@ export const ProjectService = {
   archiveProject: async (projectId: string): Promise<ServiceResponse<Projects | null>> => {
     try {
       const project = await projectRepository.findByIdAsync(projectId);
-
       if (!project) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -125,7 +121,6 @@ export const ProjectService = {
 
       const newData: Partial<Projects> = { is_archive: !project.is_archive };
       const archiveProject = await projectRepository.updateProjectByIdAsync(projectId, newData);
-
       if (!archiveProject) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -151,8 +146,7 @@ export const ProjectService = {
       );
     }
   },
-
-  addMembers: async (projectId: string, userIds: string[] | string): Promise<ServiceResponse<projectMembers[] | projectMembers | null>> => {
+  addMembers: async (projectId: string, userIds: string[]): Promise<ServiceResponse<projectMembers[] | projectMembers | null>> => {
     try {
       const project = await projectRepository.findByIdAsync(projectId);
       if (!project) {
@@ -164,76 +158,48 @@ export const ProjectService = {
         );
       }
 
-      let addedMems;
-      if (Array.isArray(userIds)) {
-        let tempMem: Partial<projectMembers>[] = []
-        for (const userId of userIds) {
-          const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userId)
-          if (!existedMem) {
-            const user = await userRepository.findByIdAsync(userId);
-            if (user === null) {
-              return new ServiceResponse(
-                ResponseStatus.Failed,
-                `User ID: ${userId} not found`,
-                null,
-                StatusCodes.BAD_REQUEST
-              );
-            }
-
-            const addMem: Partial<projectMembers> = {
-              userID: user,
-              role: RoleType.MEMBER,
-              projectID: project
-            };
-            
-            tempMem.push(addMem);
-          }
-          else console.log(`Member with ID ${userId} 's existed in this project`);      
-          
-        }
-        addedMems = await projectMemberRepository.createManyProjectMembersAsync(tempMem); 
-      }
-      else {
-        const user = await userRepository.findByIdAsync(userIds);
-        if (!user) {
-          return new ServiceResponse(
-            ResponseStatus.Failed,
-            "User ID: not found",
-            null,
-            StatusCodes.BAD_REQUEST
-          );
-        }
-        const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userIds)
+      let tempMem: Partial<projectMembers>[] = []
+      for (const userId of userIds) {
+        const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userId)
         if (!existedMem) {
+          const user = await userRepository.findByIdAsync(userId);
+          if (!user) {
+            return new ServiceResponse(
+              ResponseStatus.Failed,
+              `User ID: ${userId} not found`,
+              null,
+              StatusCodes.BAD_REQUEST
+            );
+          }
+
           const addMem: Partial<projectMembers> = {
             userID: user,
             role: RoleType.MEMBER,
             projectID: project
-          }
-          addedMems = await projectMemberRepository.creatProjectMemberAsync(addMem);
+          };
+
+          tempMem.push(addMem);
         }
-        else return new ServiceResponse(
-          ResponseStatus.Failed,
-          `Member with ID ${userIds} 's existed in this project`,
-          null,
-          StatusCodes.BAD_REQUEST
-        );
-       
+        else console.log(`Member with ID ${userId} 's existed in this project`);
+
       }
-      if (Array.isArray(addedMems) && !addedMems.length)
-        return new ServiceResponse(
-          ResponseStatus.Failed,
-          "All users is existed in this project",
-          null,
-          StatusCodes.BAD_REQUEST
-        ); 
-      if (addedMems === undefined || addedMems === null) 
+      const addedMems = await projectMemberRepository.createManyProjectMembersAsync(tempMem);
+      if (addedMems === undefined || addedMems === null)
         return new ServiceResponse(
           ResponseStatus.Failed,
           "Error adding member(s)",
           null,
           StatusCodes.INTERNAL_SERVER_ERROR
-        ); 
+        );
+
+      if (!addedMems.length)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "All users is existed in this project",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+
 
       return new ServiceResponse<projectMembers[] | projectMembers>(
         ResponseStatus.Success,
@@ -264,47 +230,31 @@ export const ProjectService = {
         );
       }
 
-      let removedMems;
-      if (Array.isArray(userIds)) {
-        let tempMem: projectMembers[] = []
-        for (const userId of userIds) {
-          const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userId)
-          if (existedMem) {
-            const removedUser = await projectMemberRepository.deleteProjectMembersAsync(projectId, userId)
-            if(removedUser) tempMem.push(removedUser);
-          }
-          else console.log(`User with ID ${userId} isn't existed in this project`);           
-        }
-        removedMems = tempMem;
-      }
-      else {
-        const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userIds)
+      let removedMems: projectMembers[] = []
+      for (const userId of userIds) {
+        const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userId)
         if (existedMem) {
-          removedMems = await projectMemberRepository.deleteProjectMembersAsync(projectId, userIds);
-          
+          const removedUser = await projectMemberRepository.deleteProjectMembersAsync(projectId, userId)
+          if (removedUser) removedMems.push(removedUser);
         }
-        else return new ServiceResponse(
-          ResponseStatus.Failed,
-          `Member with ID ${userIds} isn't existed in this project`,
-          null,
-          StatusCodes.BAD_REQUEST
-        );
-       
+        else console.log(`User with ID ${userId} isn't existed in this project`);
       }
-      if ( Array.isArray(removedMems) && !removedMems.length)
-        return new ServiceResponse(
-          ResponseStatus.Failed,
-          "All users isn't existed in this project",
-          null,
-          StatusCodes.BAD_REQUEST
-        ); 
-      if (removedMems === undefined || removedMems === null) 
+      if (removedMems === undefined || removedMems === null)
         return new ServiceResponse(
           ResponseStatus.Failed,
           "Error removing member(s) from this project",
           null,
           StatusCodes.INTERNAL_SERVER_ERROR
-        ); 
+        );
+
+      if (!removedMems.length)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "All users isn't existed in this project",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+
 
       return new ServiceResponse<projectMembers[] | projectMembers>(
         ResponseStatus.Success,
@@ -355,40 +305,40 @@ export const ProjectService = {
         );
       }
 
-      if(boardData.visibility === VisibilityType.WORKSPACE){
+      if (boardData.visibility === VisibilityType.WORKSPACE) {
         const projectMembers = await projectMemberRepository.findAllByProjectIdAsync(projectId);
         const boardMembers: Partial<BoardMembers>[] = projectMembers.map(projectMember => {
-            const boardMember: Partial <BoardMembers> = {
-                role: projectMember.role,
-                userID: projectMember.userID,
-                boardID: createdBoard
-            }
-            return boardMember;
-        })
-        const createdMem = await projectMemberRepository.createManyProjectMembersAsync(boardMembers)
-        if (!createdMem) {
-            return new ServiceResponse(
-              ResponseStatus.Failed,
-              "Error creating board members",
-              null,
-              StatusCodes.INTERNAL_SERVER_ERROR
-            );
+          const boardMember: Partial<BoardMembers> = {
+            role: projectMember.role,
+            userID: projectMember.userID,
+            boardID: createdBoard
           }
+          return boardMember;
+        })
+        const createdMem = await boardMemberRepository.createManyBoardMembersAsync(boardMembers)
+        if (!createdMem) {
+          return new ServiceResponse(
+            ResponseStatus.Failed,
+            "Error creating board members",
+            null,
+            StatusCodes.INTERNAL_SERVER_ERROR
+          );
+        }
       }
       else {
         const adminData = {
-            role: RoleType.ADMIN,
-            userID: user,
-            projectID: project
+          role: RoleType.ADMIN,
+          userID: user,
+          projectID: project
         }
         const createdMem = await projectMemberRepository.creatProjectMemberAsync(adminData);
         if (!createdMem) {
-            return new ServiceResponse(
+          return new ServiceResponse(
             ResponseStatus.Failed,
             "Error creating board admin",
             null,
             StatusCodes.INTERNAL_SERVER_ERROR
-            );
+          );
         }
       }
 

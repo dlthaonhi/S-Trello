@@ -31,7 +31,7 @@ export const authService = {
       const hashedPassword = await bcrypt.hash(userData.password, 10);
       const newUser = await userRepository.createUserAsync({
         ...userData,
-        password: hashedPassword,
+        password: hashedPassword
       });
       if (!newUser) {
         return new ServiceResponse(
@@ -43,7 +43,6 @@ export const authService = {
       }
 
       const verifyEmail = await authService.verifyEmail(userData.email);
-
       if (!verifyEmail) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -82,11 +81,11 @@ export const authService = {
           StatusCodes.NOT_FOUND
         );
       }
-      // Compare hashed password
+      // Compare entered password with hashed password
       const passwordMatch = await bcrypt.compare(
         loginData.password,
         user.password
-      ); // Compare entered password with hashed password
+      ); 
       if (!passwordMatch) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -105,6 +104,7 @@ export const authService = {
       };
 
       const updatedToken = await userRepository.updateUserByEmailAsync(user.email, {
+        ...user,
         refreshToken: token.refreshToken,
         refreshTokenExpiresAt: new Date(token.refreshTokenExpiresIn *1000)
        });
@@ -263,59 +263,14 @@ export const authService = {
     }
   },
 
-  updateRoleUser: async (
-    userId: string,
-    roleName: string
-  ): Promise<ServiceResponse<Users | null>> => {
-    try {
-      const updatedUser = await userRepository.updateUserRoleAsync(
-        userId,
-        roleName
-      );
-      if (!updatedUser) {
-        return new ServiceResponse(
-          ResponseStatus.Failed,
-          "Error updating role user",
-          null,
-          StatusCodes.INTERNAL_SERVER_ERROR
-        );
-      }
-
-      return new ServiceResponse<Users>(
-        ResponseStatus.Success,
-        "Role updated successfully",
-        updatedUser,
-        StatusCodes.OK
-      );
-    } catch (ex) {
-      const errorMessage = `Error updating role user: ${(ex as Error).message}`;
-      return new ServiceResponse(
-        ResponseStatus.Failed,
-        errorMessage,
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR
-      );
-    }
-  },
-
   verifyEmail: async (email: string): Promise<boolean> => {
     try {
-      // const user = await userRepository.findByEmailAsync(email);
-      // if (!user) {
-      //   return new ServiceResponse(
-      //     ResponseStatus.Failed,
-      //     "User not found",
-      //     null,
-      //     StatusCodes.NOT_FOUND
-      //   );
-      // }
-
       const verifyEmailToken = generateJwt({ email });
 
       const verifyUrl = `http://localhost:3000/auth/activate?token=${verifyEmailToken}`;
 
       const mailIsSent = await mailService.sendEmail({
-          emailFrom: "thaonhi6102005ll@gmail.com",
+          emailFrom: String(process.env.EMAIL_USER),
           emailTo: email,
           emailSubject: "Verify email",
           emailText: `Click on the button below to verify your email: <a href="${verifyUrl}">Verify</a>`,
@@ -324,30 +279,15 @@ export const authService = {
         if(!mailIsSent){
           return false;
         }
-
-      // return new ServiceResponse<string>(
-      //   ResponseStatus.Success,
-      //   "Email activated successfully",
-      //   email,
-      //   StatusCodes.OK
-      // );
       return true;
     } catch (ex) {
       const errorMessage = `Error activating email: ${(ex as Error).message}`;
-      // return new ServiceResponse(
-      //   ResponseStatus.Failed,
-      //   errorMessage,
-      //   null,
-      //   StatusCodes.INTERNAL_SERVER_ERROR
-      // );
       return false;
   }},
 
   verifyUser: async (token: string): Promise<ServiceResponse<Users | null>> => {
     try {
-      // Giải mã token và kiểm tra tính hợp lệ
       const decoded = verifyJwt(token);
-      
       if (!decoded) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -357,7 +297,6 @@ export const authService = {
         );
       }
       const email:string = decoded.email;    
-
       const updatedUser = await userRepository.updateUserByEmailAsync(email, {isActivated: 1});
       if (!updatedUser) {
         return new ServiceResponse(
