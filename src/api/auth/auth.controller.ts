@@ -14,6 +14,8 @@ export const AuthController = {
       const serviceResponse = await authService.register(userData);
       handleServiceResponse(serviceResponse, res);  
     } catch (error) {
+      console.log("error: ", error);
+      
       const errorMessage = `Error creating user: ${(error as Error).message}`;
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         status: ResponseStatus.Failed,

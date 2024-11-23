@@ -11,6 +11,8 @@ projectRouter.patch("/archive/:projectId", authenticateJWT, ProjectController.ar
 projectRouter.post("/member/:projectId", canAccessProject("member", "admin"), ProjectController.addMember);
 projectRouter.delete("/member/:projectId",canAccessProject("admin"), ProjectController.removeMember);
 
+projectRouter.post("/:projectId/board", canAccessProject("member", "admin"), ProjectController.createBoard)
+
 
 
 export default projectRouter;

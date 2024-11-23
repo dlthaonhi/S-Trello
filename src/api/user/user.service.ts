@@ -18,6 +18,7 @@ export const UserService = {
           StatusCodes.BAD_REQUEST
         );
       }
+      console.log(user);
 
       const updatedUser = await userRepository.updateUserByIdAsync(userId, {...user, ...newData});
       if (!updatedUser) {
@@ -28,6 +29,9 @@ export const UserService = {
           StatusCodes.INTERNAL_SERVER_ERROR
         );
       }
+      console.log(updatedUser);
+      
+      
 
       return new ServiceResponse<Users>(
         ResponseStatus.Success,

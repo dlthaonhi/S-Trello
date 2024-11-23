@@ -274,7 +274,7 @@ export const ProjectService = {
     }
   },
   createBoard: async (userId: string, projectId: string, boardData: Boards): Promise<ServiceResponse<Boards | null>> => {
-    try {
+    try {      
       const user = await userRepository.findByIdAsync(userId);
       if (!user) {
         return new ServiceResponse(
@@ -306,8 +306,12 @@ export const ProjectService = {
       }
 
       if (boardData.visibility === VisibilityType.WORKSPACE) {
-        const projectMembers = await projectMemberRepository.findAllByProjectIdAsync(projectId);
+        const projectMembers = await projectMemberRepository.findAllByProjectIdAsync(projectId, ["userID"]);
+        console.log(projectMembers);
+        
         const boardMembers: Partial<BoardMembers>[] = projectMembers.map(projectMember => {
+          console.log(projectMember.userID);
+          
           const boardMember: Partial<BoardMembers> = {
             role: projectMember.role,
             userID: projectMember.userID,
