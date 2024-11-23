@@ -45,6 +45,8 @@ export const BoardController = {
     // const userId:string | any = req.id;  // for notification api
     const boardId: string | any = req.params.boardId;
     const value: boolean = false;
+    console.log(boardId);
+    
     try {
       const serviceResponse = await BoardService.archiveBoard(boardId, value);
       handleServiceResponse(serviceResponse, res);
@@ -57,48 +59,46 @@ export const BoardController = {
       });
     }
   },
-//   async addMember(req: AuthenticatedRequest, res: Response) {
-//     // const userId:string | any = req.id;  // for notification api
-//     try {
-//       const projectId: string | any = req.params.projectId;
-//       const userId: string[] | string = req.body.userId;
-//       if (userId == undefined || userId == null)
-//         throw new Error("Missing some non-nullable field")
-
-//       let userIds: string[] = (typeof (userId) == 'string') ? [userId] : userId;
-//       if(!userIds.length) 
-//         throw new Error("Missing userId")
-//       const serviceResponse = await ProjectService.addMembers(projectId, userIds);
-//       handleServiceResponse(serviceResponse, res);
-//     } catch (error: any) {
-//       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//         status: ResponseStatus.Failed,
-//         message: error.message,
-//         data: null,
-//       });
-//     }
-//   },
-//   async removeMember(req: AuthenticatedRequest, res: Response) {
-//     try {
-//       // const userId:string | any = req.id;  // for notification api
-//       const projectId: string | any = req.params.projectId;
-//       const userId: string[] | string = req.body.userId;
-//       if (userId == undefined || userId == null)
-//         throw new Error("Missing some non-nullable field")
-//       let userIds: string[] = (typeof (userId) == 'string') ? [userId] : userId;
-//       if(!userIds.length) 
-//         throw new Error("Missing userId")
-//       const serviceResponse = await ProjectService.removeMembers(projectId, userIds);
-//       handleServiceResponse(serviceResponse, res);
-//     } catch (error) {
-//       const errorMessage = `Error removing member(s): ${(error as Error).message}`;
-//       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//         status: ResponseStatus.Failed,
-//         message: errorMessage,
-//         data: null,
-//       });
-//     }
-//   },
+  async addMember(req: AuthenticatedRequest, res: Response) {
+    // const userId:string | any = req.id;  // for notification api
+    try {
+      const boardId: string | any = req.params.boardId;
+      const userId: string[] | string = req.body.userId;
+      if (userId == undefined || userId == null)
+        throw new Error("Missing some non-nullable field")
+      let userIds: string[] = (typeof (userId) == 'string') ? [userId] : userId;
+      if(!userIds.length) 
+        throw new Error("Missing userId")
+      const serviceResponse = await BoardService.addMembers(boardId, userIds);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error: any) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
+  async removeMember(req: AuthenticatedRequest, res: Response) {
+    try {
+      // const userId:string | any = req.id;  // for notification api      
+      const boardId: string | any = req.params.boardId;
+      const userId: string[] | string = req.body.userId;
+      if (userId == undefined || userId == null)
+        throw new Error("Missing some non-nullable field")
+      let userIds: string[] = (typeof (userId) == 'string') ? [userId] : userId;
+      if(!userIds.length) 
+        throw new Error("Missing userId")
+      const serviceResponse = await BoardService.removeMembers(boardId, userIds);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error: any) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
 //   async createBoard(req: AuthenticatedRequest, res: Response) {
 //     const userId: string | any = req.id;
 //     const projectId: string | any = req.params.projectId;

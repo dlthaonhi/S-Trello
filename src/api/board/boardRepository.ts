@@ -44,9 +44,9 @@ export const boardMemberRepository = dataSource.getRepository(BoardMembers).exte
   //   return this.findOneBy({ id: id });
   // },
 
-  // async findByProjectIdAsync(projectId: string): Promise<projectMembers | null> {
-  //   return this.findOneBy({ projectID: { id: projectId } });
-  // },
+  async findByBoardIdAsync(boardId: string): Promise<BoardMembers | null> {
+    return this.findOneBy({ boardID: { id: boardId } });
+  },
 
   // async findByProjectAndRelationAsync(project: Projects, relations: string[]): Promise<projectMembers | null> {
   //   return this.findOne({
@@ -55,11 +55,11 @@ export const boardMemberRepository = dataSource.getRepository(BoardMembers).exte
   //   });
   // },
 
-  // async findByProjectAndUserIdAsync(projectId: string, userId: string): Promise<projectMembers | null> {
-  //   return this.findOne({
-  //     where: { projectID: { id: projectId }, userID: { id: userId } },
-  //   });
-  // },
+  async findByBoardAndUserIdAsync(boardId: string, userId: string): Promise<BoardMembers | null> {
+    return this.findOne({
+      where: { boardID: { id: boardId }, userID: { id: userId } },
+    });
+  },
 
   async creatBoardMemberAsync(memData: Partial<BoardMembers>): Promise<BoardMembers | null> {
     const newMem = this.create(memData);
@@ -71,12 +71,12 @@ export const boardMemberRepository = dataSource.getRepository(BoardMembers).exte
     return this.save(newMems);
   },
 
-  // async deleteProjectMembersAsync (projectId: string, userId: string): Promise<projectMembers | null> {
-  //   const removeItem = await this.findOne({
-  //     where: { projectID: { id: projectId }, userID: { id: userId } },
-  //   });
-  //   if(!removeItem) return null;
-  //   return await this.remove(removeItem);
-  // },
+  async deleteBoardMembersAsync (boardId: string, userId: string): Promise<BoardMembers | null> {
+    const removeItem = await this.findOne({
+      where: { boardID: { id: boardId }, userID: { id: userId } },
+    });
+    if(!removeItem) return null;
+    return await this.remove(removeItem);
+  },
 
 });

@@ -100,133 +100,133 @@ export const BoardService = {
       );
     }
   },
-//   addMembers: async (projectId: string, userIds: string[]): Promise<ServiceResponse<projectMembers[] | projectMembers | null>> => {
-//     try {
-//       const project = await projectRepository.findByIdAsync(projectId);
-//       if (!project) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Project ID: not found",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
-//       }
+  addMembers: async (boardId: string, userIds: string[]): Promise<ServiceResponse<BoardMembers[] | BoardMembers | null>> => {
+    try {
+      const board = await boardRepository.findByIdAsync(boardId); 
+      if (!board) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Board ID: not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
 
-//       let tempMem: Partial<projectMembers>[] = []
-//       for (const userId of userIds) {
-//         const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userId)
-//         if (!existedMem) {
-//           const user = await userRepository.findByIdAsync(userId);
-//           if (!user) {
-//             return new ServiceResponse(
-//               ResponseStatus.Failed,
-//               `User ID: ${userId} not found`,
-//               null,
-//               StatusCodes.BAD_REQUEST
-//             );
-//           }
+      let tempMem: Partial<BoardMembers>[] = []
+      for (const userId of userIds) {
+        const existedMem = await boardMemberRepository.findByBoardAndUserIdAsync(boardId, userId)
+        if (!existedMem) {
+          const user = await userRepository.findByIdAsync(userId);
+          if (!user) {
+            return new ServiceResponse(
+              ResponseStatus.Failed,
+              `User ID: ${userId} not found`,
+              null,
+              StatusCodes.BAD_REQUEST
+            );
+          }
 
-//           const addMem: Partial<projectMembers> = {
-//             userID: user,
-//             role: RoleType.MEMBER,
-//             projectID: project
-//           };
+          const addMem: Partial<BoardMembers> = {
+            userID: user,
+            role: RoleType.MEMBER,
+            boardID: board
+          };
 
-//           tempMem.push(addMem);
-//         }
-//         else console.log(`Member with ID ${userId} 's existed in this project`);
+          tempMem.push(addMem);
+        }
+        else console.log(`Member with ID ${userId} 's existed in this board`);
 
-//       }
-//       const addedMems = await projectMemberRepository.createManyProjectMembersAsync(tempMem);
-//       if (addedMems === undefined || addedMems === null)
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Error adding member(s)",
-//           null,
-//           StatusCodes.INTERNAL_SERVER_ERROR
-//         );
+      }
+      const addedMems = await boardMemberRepository.createManyBoardMembersAsync(tempMem);
+      if (addedMems === undefined || addedMems === null)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error adding member(s)",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
 
-//       if (!addedMems.length)
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "All users is existed in this project",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
-
-
-//       return new ServiceResponse<projectMembers[] | projectMembers>(
-//         ResponseStatus.Success,
-//         "Project member(s) added successfully!",
-//         addedMems,
-//         StatusCodes.OK
-//       );
-
-//     } catch (ex) {
-//       const errorMessage = `Error adding member(s): ${(ex as Error).message}`;
-//       return new ServiceResponse(
-//         ResponseStatus.Failed,
-//         errorMessage,
-//         null,
-//         StatusCodes.INTERNAL_SERVER_ERROR
-//       );
-//     }
-//   },
-//   removeMembers: async (projectId: string, userIds: string[] | string): Promise<ServiceResponse<projectMembers[] | projectMembers | null>> => {
-//     try {
-//       const project = await projectMemberRepository.findByProjectIdAsync(projectId);
-//       if (!project) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Project ID: not found",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
-//       }
-
-//       let removedMems: projectMembers[] = []
-//       for (const userId of userIds) {
-//         const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userId)
-//         if (existedMem) {
-//           const removedUser = await projectMemberRepository.deleteProjectMembersAsync(projectId, userId)
-//           if (removedUser) removedMems.push(removedUser);
-//         }
-//         else console.log(`User with ID ${userId} isn't existed in this project`);
-//       }
-//       if (removedMems === undefined || removedMems === null)
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Error removing member(s) from this project",
-//           null,
-//           StatusCodes.INTERNAL_SERVER_ERROR
-//         );
-
-//       if (!removedMems.length)
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "All users isn't existed in this project",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
+      if (!addedMems.length)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "All users is existed in this board",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
 
 
-//       return new ServiceResponse<projectMembers[] | projectMembers>(
-//         ResponseStatus.Success,
-//         "Project member(s) removed successfully!",
-//         removedMems,
-//         StatusCodes.OK
-//       );
+      return new ServiceResponse<BoardMembers[] | BoardMembers>(
+        ResponseStatus.Success,
+        "Board member(s) added successfully!",
+        addedMems,
+        StatusCodes.OK
+      );
 
-//     } catch (ex) {
-//       const errorMessage = `Error removing member(s): ${(ex as Error).message}`;
-//       return new ServiceResponse(
-//         ResponseStatus.Failed,
-//         errorMessage,
-//         null,
-//         StatusCodes.INTERNAL_SERVER_ERROR
-//       );
-//     }
-//   },
+    } catch (ex) {
+      const errorMessage = `Error adding member(s): ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
+  removeMembers: async (boardId: string, userIds: string[] | string): Promise<ServiceResponse<BoardMembers[] | BoardMembers | null>> => {
+    try {
+      const board = await boardMemberRepository.findByBoardIdAsync(boardId);
+      if (!board) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Board ID: not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+
+      let removedMems: BoardMembers[] = []
+      for (const userId of userIds) {
+        const existedMem = await boardMemberRepository.findByBoardAndUserIdAsync(boardId, userId)
+        if (existedMem) {
+          const removedUser = await boardMemberRepository.deleteBoardMembersAsync(boardId, userId)
+          if (removedUser) removedMems.push(removedUser);
+        }
+        else console.log(`User with ID ${userId} isn't existed in this board`);
+      }
+      if (removedMems === undefined || removedMems === null)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error removing member(s) from this board",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+
+      if (!removedMems.length)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "All users isn't existed in this board",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+
+
+      return new ServiceResponse<BoardMembers[] | BoardMembers>(
+        ResponseStatus.Success,
+        "Project member(s) removed successfully!",
+        removedMems,
+        StatusCodes.OK
+      );
+
+    } catch (ex) {
+      const errorMessage = `Error removing member(s): ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
 //   createBoard: async (userId: string, projectId: string, boardData: Boards): Promise<ServiceResponse<Boards | null>> => {
 //     try {      
 //       const user = await userRepository.findByIdAsync(userId);
