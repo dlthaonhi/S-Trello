@@ -119,8 +119,6 @@ export const ProjectController = {
     const boardData: Boards = req.body;
     if (!boardData.title) 
       throw new Error ("Missing some non-nullable field")
-    if (boardData.visibility != VisibilityType.PRIVATE && boardData.visibility != VisibilityType.WORKSPACE)
-      throw new Error ("Visibility type must be workspace or private");
     try {
       const serviceResponse = await ProjectService.createBoard(userId, projectId, boardData);
       handleServiceResponse(serviceResponse, res);

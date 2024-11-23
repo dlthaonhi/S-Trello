@@ -7,6 +7,7 @@ import { BoardService } from "./board.service";
 import { Projects } from "../../model/projects/projects.entity";
 import { Boards } from "@/model/projects/boards.entity";
 import { VisibilityType } from "@/model/base/enumType.entity";
+import { Lists } from "@/model/projects/lists.entity";
 
 export const BoardController = {
   async updateBoard(req: AuthenticatedRequest, res: Response) {
@@ -99,25 +100,23 @@ export const BoardController = {
       });
     }
   },
-//   async createBoard(req: AuthenticatedRequest, res: Response) {
-//     const userId: string | any = req.id;
-//     const projectId: string | any = req.params.projectId;
-//     const boardData: Boards = req.body;
-//     if (!boardData.title) 
-//       throw new Error ("Missing some non-nullable field")
-//     if (boardData.visibility != VisibilityType.PRIVATE && boardData.visibility != VisibilityType.WORKSPACE)
-//       throw new Error ("Visibility type must be workspace or private");
-//     try {
-//       const serviceResponse = await ProjectService.createBoard(userId, projectId, boardData);
-//       handleServiceResponse(serviceResponse, res);
-//     } catch (error) {
-//       const errorMessage = `Error creating board: ${(error as Error).message}`;
-//       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//         status: ResponseStatus.Failed,
-//         message: errorMessage,
-//         data: null,
-//       });
-//     }
-//   },
+  async createList(req: AuthenticatedRequest, res: Response) {
+    const userId: string | any = req.id;
+    const boardId: string | any = req.params.boardId;
+    const listData: Lists = req.body;
+    if (!listData.title) 
+      throw new Error ("Missing some non-nullable field")
+    try {
+      const serviceResponse = await BoardService.createList(userId, boardId, listData);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      const errorMessage = `Error creating list: ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  },
 
 };

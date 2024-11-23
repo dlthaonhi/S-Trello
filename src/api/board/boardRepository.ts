@@ -1,22 +1,19 @@
-import { Projects } from "../../model/projects/projects.entity";
-
 import dataSource from "../../config/typeorm.config";
 import { DeepPartial } from "typeorm";
-import { projectMembers } from "@/model/projects/projectMembers.entity";
 import { Boards } from "@/model/projects/boards.entity";
 import { BoardMembers } from "@/model/projects/boardMembers.entity";
 
 export const boardRepository = dataSource.getRepository(Boards).extend({
-  // async findAllAsync(): Promise<Projects[]> {
-  //   return this.find();
-  // },
+  async findAllAsync(): Promise<Boards[]> {
+    return this.find();
+  },
 
   async findByIdAsync(id: string): Promise<Boards | null> {
     return this.findOneBy({ id: id });
   },
 
-  async createBoardAsync(newDate: Partial<Boards>): Promise<Boards | null > {  
-    const newBoard = this.create(newDate);
+  async createBoardAsync(newData: Partial<Boards>): Promise<Boards | null > {  
+    const newBoard = this.create(newData);
     return this.save(newBoard);
   },
 
@@ -27,33 +24,38 @@ export const boardRepository = dataSource.getRepository(Boards).extend({
       await this.save(updateData);
     return this.findOneBy({id});
   },
+
+  async countBoardsByProjectIdAsync(projectId: string): Promise<number> {
+    return this.count({ where: {project: {id: projectId}}})
+  }
+
 });
 
 export const boardMemberRepository = dataSource.getRepository(BoardMembers).extend({
-  // async findAllAsync(): Promise<projectMembers[]> {
-  //   return this.find();
-  // },
+  async findAllAsync(): Promise<BoardMembers[]> {
+    return this.find();
+  },
 
-  // async findAllByProjectIdAsync(projectId: string): Promise<projectMembers[]> {
-  //   return this.find({
-  //       where: { projectID: { id: projectId }}
-  //   });
-  // },
+  async findAllByBoardIdAsync(boardId: string): Promise<BoardMembers[]> {
+    return this.find({
+        where: { boardID: { id: boardId }}
+    });
+  },
 
-  // async findByIdAsync(id: string): Promise<projectMembers | null> {
-  //   return this.findOneBy({ id: id });
-  // },
+  async findByIdAsync(id: string): Promise<BoardMembers | null> {
+    return this.findOneBy({ id: id });
+  },
 
   async findByBoardIdAsync(boardId: string): Promise<BoardMembers | null> {
     return this.findOneBy({ boardID: { id: boardId } });
   },
 
-  // async findByProjectAndRelationAsync(project: Projects, relations: string[]): Promise<projectMembers | null> {
-  //   return this.findOne({
-  //     where: { projectID: { id: project.id } },
-  //     relations: relations,
-  //   });
-  // },
+  async findByBoardIdAndRelationAsync(boardId: string, relations: string[]): Promise<BoardMembers | null> {
+    return this.findOne({
+      where: { boardID: { id: boardId } },
+      relations: relations,
+    });
+  },
 
   async findByBoardAndUserIdAsync(boardId: string, userId: string): Promise<BoardMembers | null> {
     return this.findOne({

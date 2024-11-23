@@ -207,7 +207,6 @@ export const ProjectService = {
           StatusCodes.BAD_REQUEST
         );
 
-
       return new ServiceResponse<projectMembers[] | projectMembers>(
         ResponseStatus.Success,
         "Project member(s) added successfully!",
