@@ -28,7 +28,7 @@ export class Boards extends DateTimeEntity {
   @Column({ type: "varchar", length: 255, nullable: true })
   public coverUrl: string;
 
-  @Column({ type: "enum", enum: VisibilityType, nullable: false})
+  @Column({ type: "enum", enum: VisibilityType, default: VisibilityType.WORKSPACE})
   public visibility: VisibilityType;
 
   @ManyToOne(() => Users, (user) => user.boards)

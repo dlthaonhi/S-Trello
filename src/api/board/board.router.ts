@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { BoardController } from "./board.controller"
-import authenticateJWT from "@/middleware/authentication";
 import { canAccessBy } from "@/middleware/checkRole";
 
 const boardRouter = Router();
@@ -12,4 +11,5 @@ boardRouter.patch("/unarchive/:boardId", canAccessBy("board","member", "admin"),
 boardRouter.post("/member/:boardId", canAccessBy("board","member", "admin"), BoardController.addMember);
 boardRouter.delete("/member/:boardId",canAccessBy("board", "admin"), BoardController.removeMember);
 
+boardRouter.post("/:boardId/list",canAccessBy("board","member", "admin"), BoardController.createList)
 export default boardRouter;

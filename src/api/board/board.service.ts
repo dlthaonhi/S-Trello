@@ -5,15 +5,15 @@ import {
 } from "../../services/serviceResponse";
 import { StatusCodes } from "http-status-codes";
 import { userRepository } from "../../api/user/userRepository";
-import { projectRepository, projectMemberRepository } from "../project/projectRepository";
-import { Projects } from "../../model/projects/projects.entity";
-import { projectMembers } from "../../model/projects/projectMembers.entity";
 import { RoleType, VisibilityType } from "../../model/base/enumType.entity";
 import { type } from "os";
 import { IsNull } from "typeorm";
 import { Boards } from "@/model/projects/boards.entity";
 import { BoardMembers } from "@/model/projects/boardMembers.entity";
 import { boardMemberRepository, boardRepository } from "../board/boardRepository";
+import { Lists } from "@/model/projects/lists.entity";
+import { btoa } from "buffer";
+import { listRepository } from "../list/listRepository";
 
 export const BoardService = {
   updateBoard: async (boardId: string, newData: Partial<Boards>): Promise<ServiceResponse<Boards | null>> => {
@@ -227,103 +227,43 @@ export const BoardService = {
       );
     }
   },
-//   createBoard: async (userId: string, projectId: string, boardData: Boards): Promise<ServiceResponse<Boards | null>> => {
-//     try {      
-//       const user = await userRepository.findByIdAsync(userId);
-//       if (!user) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "UserID: Not found",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
-//       }
-//       const project = await projectRepository.findByIdAsync(projectId)
-//       if (!project) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "ProjectID: Not found",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
-//       }
-//       boardData.user = user;
-//       boardData.project = project;
-//       if (!boardData.visibility) boardData.visibility = VisibilityType.WORKSPACE;
-//       const createdBoard = await boardRepository.createBoardAsync(boardData);
-//       if (!createdBoard) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Error creating board",
-//           null,
-//           StatusCodes.INTERNAL_SERVER_ERROR
-//         );
-//       }
+  createList: async (userId: string, boardId: string, listData: Lists): Promise<ServiceResponse<Lists | null>> => {
+    try {      
+      const board = await boardRepository.findByIdAsync(boardId)
+      if (!board) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Board ID: Not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      listData.boardID = board;
+      listData.position = await listRepository.countListsByBoardIdAsync(boardId) + 1;
+      const createdList = await listRepository.createListAsync(listData);
+      if (!createdList) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error creating list",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
 
-//       if (boardData.visibility === VisibilityType.WORKSPACE) {
-//         const projectMembers = await projectMemberRepository.findAllByProjectIdAsync(projectId, ["userID"]);
-//         console.log(projectMembers);
-        
-//         const boardMembers: Partial<BoardMembers>[] = projectMembers.map(projectMember => {
-//           let boardMember: Partial<BoardMembers> ;
-//           if (projectMember.userID.id == userId) {
-//             boardMember = {
-//               role: RoleType.ADMIN,
-//               userID: projectMember.userID,
-//               boardID: createdBoard
-//             }
-//           }
-//           else {
-//             boardMember= {
-//               role: RoleType.MEMBER,
-//               userID: projectMember.userID,
-//               boardID: createdBoard
-//             }
-//           }
-        
-//           return boardMember;
-//         })
-//         const createdMem = await boardMemberRepository.createManyBoardMembersAsync(boardMembers)
-//         if (!createdMem) {
-//           return new ServiceResponse(
-//             ResponseStatus.Failed,
-//             "Error creating board members",
-//             null,
-//             StatusCodes.INTERNAL_SERVER_ERROR
-//           );
-//         }
-//       }
-//       if (boardData.visibility === VisibilityType.PRIVATE) {
-//         const adminData = {
-//           role: RoleType.ADMIN,
-//           userID: user,
-//           boardID: createdBoard
-//         }
-//         const createdMem = await boardMemberRepository.creatBoardMemberAsync(adminData);
-//         if (!createdMem) {
-//           return new ServiceResponse(
-//             ResponseStatus.Failed,
-//             "Error creating board admin",
-//             null,
-//             StatusCodes.INTERNAL_SERVER_ERROR
-//           );
-//         }
-//       }
-
-//       return new ServiceResponse<Boards>(
-//         ResponseStatus.Success,
-//         "New board's created successfully!",
-//         createdBoard,
-//         StatusCodes.CREATED
-//       );
-//     } catch (ex) {
-//       const errorMessage = `Error creating board: ${(ex as Error).message}`;
-//       return new ServiceResponse(
-//         ResponseStatus.Failed,
-//         errorMessage,
-//         null,
-//         StatusCodes.INTERNAL_SERVER_ERROR
-//       );
-//     }
-//   },
+      return new ServiceResponse<Lists>(
+        ResponseStatus.Success,
+        "New list's created successfully!",
+        createdList,
+        StatusCodes.CREATED
+      );
+    } catch (ex) {
+      const errorMessage = `Error creating list: ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
 };
