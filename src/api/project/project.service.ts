@@ -98,7 +98,7 @@ export const ProjectService = {
         StatusCodes.CREATED
       );
     } catch (ex) {
-      const errorMessage = `Error updating projects: ${(ex as Error).message}`;
+      const errorMessage = `Error updating project: ${(ex as Error).message}`;
       return new ServiceResponse(
         ResponseStatus.Failed,
         errorMessage,
@@ -107,20 +107,27 @@ export const ProjectService = {
       );
     }
   },
-  archiveProject: async (projectId: string): Promise<ServiceResponse<Projects | null>> => {
+  archiveProject: async (projectId: string, value: boolean): Promise<ServiceResponse<Projects | null>> => {
     try {
       const project = await projectRepository.findByIdAsync(projectId);
-      if (!project) {
+      if (!project) 
         return new ServiceResponse(
           ResponseStatus.Failed,
           "Project ID: not found",
           null,
           StatusCodes.BAD_REQUEST
         );
-      }
-
-      const newData: Partial<Projects> = { is_archive: !project.is_archive };
-      const archiveProject = await projectRepository.updateProjectByIdAsync(projectId, newData);
+      
+      if (project.is_archive == value) 
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Project is already archived/ unarchived",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      const newData: Partial<Projects> = { is_archive: value };      
+      const archiveProject = await projectRepository.updateProjectByIdAsync(projectId, {...project, ...newData});
+      
       if (!archiveProject) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -295,6 +302,7 @@ export const ProjectService = {
       }
       boardData.user = user;
       boardData.project = project;
+      if (!boardData.visibility) boardData.visibility = VisibilityType.WORKSPACE;
       const createdBoard = await boardRepository.createBoardAsync(boardData);
       if (!createdBoard) {
         return new ServiceResponse(
@@ -310,13 +318,22 @@ export const ProjectService = {
         console.log(projectMembers);
         
         const boardMembers: Partial<BoardMembers>[] = projectMembers.map(projectMember => {
-          console.log(projectMember.userID);
-          
-          const boardMember: Partial<BoardMembers> = {
-            role: projectMember.role,
-            userID: projectMember.userID,
-            boardID: createdBoard
+          let boardMember: Partial<BoardMembers> ;
+          if (projectMember.userID.id == userId) {
+            boardMember = {
+              role: RoleType.ADMIN,
+              userID: projectMember.userID,
+              boardID: createdBoard
+            }
           }
+          else {
+            boardMember= {
+              role: RoleType.MEMBER,
+              userID: projectMember.userID,
+              boardID: createdBoard
+            }
+          }
+        
           return boardMember;
         })
         const createdMem = await boardMemberRepository.createManyBoardMembersAsync(boardMembers)
@@ -329,13 +346,13 @@ export const ProjectService = {
           );
         }
       }
-      else {
+      if (boardData.visibility === VisibilityType.PRIVATE) {
         const adminData = {
           role: RoleType.ADMIN,
           userID: user,
-          projectID: project
+          boardID: createdBoard
         }
-        const createdMem = await projectMemberRepository.creatProjectMemberAsync(adminData);
+        const createdMem = await boardMemberRepository.creatBoardMemberAsync(adminData);
         if (!createdMem) {
           return new ServiceResponse(
             ResponseStatus.Failed,

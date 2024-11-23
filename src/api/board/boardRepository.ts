@@ -11,30 +11,22 @@ export const boardRepository = dataSource.getRepository(Boards).extend({
   //   return this.find();
   // },
 
-  // async findByIdAsync(id: string): Promise<Projects | null> {
-  //   return this.findOneBy({ id: id });
-  // },
+  async findByIdAsync(id: string): Promise<Boards | null> {
+    return this.findOneBy({ id: id });
+  },
 
   async createBoardAsync(newDate: Partial<Boards>): Promise<Boards | null > {  
     const newBoard = this.create(newDate);
     return this.save(newBoard);
   },
 
-  // async updateProjectAsync(
-  //   id: string,
-  //   updateData: Partial<Projects>
-  // ): Promise<Projects | null> {
-  //   await this.update(id, updateData);
-  //   return this.findOneBy({ id });
-  // },
-
-  // async updateProjectByIdAsync(  
-  //   id: string,
-  //   updateData: Partial<Projects>
-  // ): Promise<Projects | null> {
-  //     await this.save(updateData);
-  //   return this.findOneBy({id});
-  // },
+  async updateBoardByIdAsync(  
+    id: string,
+    updateData: Partial<Boards>
+  ): Promise<Boards | null> {
+      await this.save(updateData);
+    return this.findOneBy({id});
+  },
 });
 
 export const boardMemberRepository = dataSource.getRepository(BoardMembers).extend({
@@ -69,10 +61,10 @@ export const boardMemberRepository = dataSource.getRepository(BoardMembers).exte
   //   });
   // },
 
-  // async creatProjectMemberAsync(memData: Partial<projectMembers>): Promise<projectMembers | null> {
-  //   const newMem = this.create(memData);
-  //   return this.save(newMem);
-  // },
+  async creatBoardMemberAsync(memData: Partial<BoardMembers>): Promise<BoardMembers | null> {
+    const newMem = this.create(memData);
+    return this.save(newMem);
+  },
 
   async createManyBoardMembersAsync(memDatas: DeepPartial<BoardMembers>[]): Promise<BoardMembers[] | null> {
     const newMems = this.create(memDatas);

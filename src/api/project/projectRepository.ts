@@ -30,6 +30,8 @@ export const projectRepository = dataSource.getRepository(Projects).extend({
     id: string,
     updateData: Partial<Projects>
   ): Promise<Projects | null> {
+    console.log(updateData);
+    
       await this.save(updateData);
     return this.findOneBy({id});
   },
