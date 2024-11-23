@@ -40,9 +40,10 @@ export const projectMemberRepository = dataSource.getRepository(projectMembers).
     return this.find();
   },
 
-  async findAllByProjectIdAsync(projectId: string): Promise<projectMembers[]> {
+  async findAllByProjectIdAsync(projectId: string, relations: string[]): Promise<projectMembers[]> {
     return this.find({
-        where: { projectID: { id: projectId }}
+        where: { projectID: { id: projectId }},
+        relations: relations,
     });
   },
 

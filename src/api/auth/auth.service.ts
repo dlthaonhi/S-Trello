@@ -78,7 +78,7 @@ export const authService = {
           ResponseStatus.Failed,
           "User not found",
           null,
-          StatusCodes.NOT_FOUND
+          StatusCodes.CONFLICT
         );
       }
       // Compare entered password with hashed password
@@ -96,8 +96,8 @@ export const authService = {
       }
 
       const token: Token = {
-        accessToken: generateJwt({ userId: user.id }),
-        refreshToken: generateJwt({ userId: user.id }),
+        accessToken: generateJwt({ userId: user.id }, "1h"),
+        refreshToken: generateJwt({ userId: user.id }, "1000h"),
         accessTokenExpiresIn: calculateUnixTime(process.env.JWT_EXPIRES_IN || "1h"),
         refreshTokenExpiresIn: calculateUnixTime(process.env.JWT_EXPIRES_IN || "1000h"),
         tokenType: "Bearer",
