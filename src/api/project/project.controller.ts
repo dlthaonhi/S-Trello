@@ -6,6 +6,7 @@ import type { AuthenticatedRequest } from "../../middleware/authentication"
 import { ProjectService } from "./project.service";
 import { Projects } from "../../model/projects/projects.entity";
 import { Boards } from "@/model/projects/boards.entity";
+import { VisibilityType } from "@/model/base/enumType.entity";
 
 export const ProjectController = {
   async createProject(req: AuthenticatedRequest, res: Response) {
@@ -42,11 +43,28 @@ export const ProjectController = {
   async archiveProject(req: AuthenticatedRequest, res: Response) {
     // const userId:string | any = req.id;  // for notification api
     const projectId: string | any = req.params.projectId;
+    const value: boolean = true;
     try {
-      const serviceResponse = await ProjectService.archiveProject(projectId);
+      const serviceResponse = await ProjectService.archiveProject(projectId, value);
       handleServiceResponse(serviceResponse, res);
     } catch (error) {
       const errorMessage = `Error archiving project: ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  },
+  async unarchiveProject(req: AuthenticatedRequest, res: Response) {
+    // const userId:string | any = req.id;  // for notification api
+    const projectId: string | any = req.params.projectId;
+    const value: boolean = false;
+    try {
+      const serviceResponse = await ProjectService.archiveProject(projectId, value);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      const errorMessage = `Error unarchiving project: ${(error as Error).message}`;
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         status: ResponseStatus.Failed,
         message: errorMessage,
@@ -100,9 +118,10 @@ export const ProjectController = {
     const userId: string | any = req.id;
     const projectId: string | any = req.params.projectId;
     const boardData: Boards = req.body;
-    if (!boardData.title || !boardData.visibility) 
+    if (!boardData.title) 
       throw new Error ("Missing some non-nullable field")
-    
+    if (boardData.visibility != VisibilityType.PRIVATE && boardData.visibility != VisibilityType.WORKSPACE)
+      throw new Error ("Visibility type must be workspace or private");
     try {
       const serviceResponse = await ProjectService.createBoard(userId, projectId, boardData);
       handleServiceResponse(serviceResponse, res);
