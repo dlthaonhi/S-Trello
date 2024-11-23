@@ -105,11 +105,10 @@ export const ProjectController = {
         throw new Error("Missing userId")
       const serviceResponse = await ProjectService.removeMembers(projectId, userIds);
       handleServiceResponse(serviceResponse, res);
-    } catch (error) {
-      const errorMessage = `Error removing member(s): ${(error as Error).message}`;
+    } catch (error: any) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         status: ResponseStatus.Failed,
-        message: errorMessage,
+        message: error.message,
         data: null,
       });
     }
