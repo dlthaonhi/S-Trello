@@ -12,4 +12,6 @@ boardRouter.post("/member/:boardId", canAccessBy("board","member", "admin"), Boa
 boardRouter.delete("/member/:boardId",canAccessBy("board", "admin"), BoardController.removeMember);
 
 boardRouter.post("/:boardId/list",canAccessBy("board","member", "admin"), BoardController.createList)
+boardRouter.post("/:boardId/lists/sort",canAccessBy("board","member", "admin"), BoardController.sortList)
+
 export default boardRouter;

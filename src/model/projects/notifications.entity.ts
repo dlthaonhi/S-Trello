@@ -27,6 +27,6 @@ export class Notifications extends DateTimeEntity {
   @Column({ type: "boolean", default: false })
   public isRead: boolean;
 
-  @ManyToOne(() => Users, (users) => users.notifications, { cascade: true })
+  @ManyToOne(() => Users, (users) => users.notifications)
   userID: Users;
 }

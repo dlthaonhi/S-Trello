@@ -71,10 +71,10 @@ export class Users extends DateTimeEntity {
   })
   boardMembers: BoardMembers[];
 
-  @OneToMany(() => Comments, (comments) => comments.userID)
+  @OneToMany(() => Comments, (comments) => comments.userID, {cascade: true})
   comments: Comments[];
 
-  @OneToMany(() => Notifications, (notifications) => notifications.userID)
+  @OneToMany(() => Notifications, (notifications) => notifications.userID, {cascade: true})
   notifications: Notifications[];
 
   // @ManyToMany(() => Roles, (role) => role.users, {

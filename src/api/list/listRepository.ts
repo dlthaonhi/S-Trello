@@ -7,22 +7,29 @@ export const listRepository = dataSource.getRepository(Lists).extend({
 //     return this.find();
 //   },
 
-//   async findByIdAsync(id: string): Promise<Boards | null> {
-//     return this.findOneBy({ id: id });
-//   },
+  async findByIdAsync(id: string): Promise<Lists | null> {
+    return this.findOneBy({ id: id });
+  },
 
   async createListAsync(newData: Partial<Lists>): Promise<Lists | null > {  
     const newBoard = this.create(newData);
     return this.save(newBoard);
   },
 
-//   async updateBoardByIdAsync(  
-//     id: string,
-//     updateData: Partial<Boards>
-//   ): Promise<Boards | null> {
-//       await this.save(updateData);
-//     return this.findOneBy({id});
-//   },
+  async updateListByIdAsync(  
+    id: string,
+    updateData: Partial<Lists>
+  ): Promise<Lists | null> {
+      await this.save(updateData);
+    return this.findOneBy({id});
+  },
+
+  async findByListIdAndRelationAsync(listId: string, relations: string[]): Promise<Lists | null> {
+    return this.findOne({
+      where: {  id: listId },
+      relations: relations,
+    });
+  },
 
   async countListsByBoardIdAsync(boardId: string): Promise<number> {
     return this.count({ where: {boardID: {id: boardId}}})
