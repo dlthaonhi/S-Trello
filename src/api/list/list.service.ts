@@ -21,6 +21,7 @@ export const ListService = {
   updateList: async (listId: string, newData: Partial<Lists>): Promise<ServiceResponse<Lists | null>> => {
     try {
       const list = await listRepository.findByIdAsync(listId);
+      
       if (!list) {
         return new ServiceResponse(
           ResponseStatus.Failed,

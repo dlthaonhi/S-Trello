@@ -6,6 +6,7 @@ import type { AuthenticatedRequest } from "../../middleware/authentication"
 import { ListService } from "./list.service";
 import { Boards } from "@/model/projects/boards.entity";
 import { Lists } from "@/model/projects/lists.entity";
+import { Cards } from "@/model/projects/cards.entity";
 
 export const ListController = {
   async updateList(req: AuthenticatedRequest, res: Response) {
@@ -57,23 +58,22 @@ export const ListController = {
       });
     }
   },
-//   async createList(req: AuthenticatedRequest, res: Response) {
-//     const userId: string | any = req.id;
-//     const boardId: string | any = req.params.boardId;
-//     const listData: Lists = req.body;
-//     if (!listData.title) 
-//       throw new Error ("Missing some non-nullable field")
-//     try {
-//       const serviceResponse = await BoardService.createList(userId, boardId, listData);
-//       handleServiceResponse(serviceResponse, res);
-//     } catch (error) {
-//       const errorMessage = `Error creating list: ${(error as Error).message}`;
-//       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//         status: ResponseStatus.Failed,
-//         message: errorMessage,
-//         data: null,
-//       });
-//     }
-//   },
+  async createCard(req: AuthenticatedRequest, res: Response) {
+    const listId: string | any = req.params.listId;
+    const cardData: Cards = req.body;
+    if (!cardData.title) 
+      throw new Error ("Missing some non-nullable field")
+    try {
+      const serviceResponse = await ListService.createCard(listId, cardData);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      const errorMessage = `Error creating card: ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  },
 
 };

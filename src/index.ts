@@ -7,6 +7,7 @@ import userRouter from "./api/user/user.router";
 import projectRouter from "./api/project/project.router";
 import boardRouter from "./api/board/board.router";
 import listRouter from "./api/list/list.router";
+import cardRouter from "./api/card/card.router";
 
 const app: Express = express();
 const port = 3000;
@@ -33,7 +34,8 @@ app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/project", projectRouter);
 app.use("/board", boardRouter);
-app.use("/list", listRouter)
+app.use("/list", listRouter);
+app.use("/card", cardRouter)
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);

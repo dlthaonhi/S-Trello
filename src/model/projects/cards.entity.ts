@@ -20,8 +20,8 @@ export class Cards extends DateTimeEntity {
   @Column({ type: "varchar", length: 255 })
   public title: string;
 
-  @Column({ type: "int", default: 0, nullable: true })
-  public description: Int32;
+  @Column({ type: "varchar", length: 255 })
+  public description: string;
 
   @Column({ type: "int", default: 0, nullable: true })
   public position: number;
