@@ -57,24 +57,24 @@ export const BoardService = {
   archiveBoard: async (boardId: string, value: boolean): Promise<ServiceResponse<Boards | null>> => {
     try {
       const board = await boardRepository.findByIdAsync(boardId);
-      if (!board) 
+      if (!board)
         return new ServiceResponse(
           ResponseStatus.Failed,
           "Board ID: not found",
           null,
           StatusCodes.BAD_REQUEST
         );
-      
-      if (board.is_archive == value) 
+
+      if (board.is_archive == value)
         return new ServiceResponse(
           ResponseStatus.Failed,
           "Board is already archived/ unarchived",
           null,
           StatusCodes.BAD_REQUEST
         );
-      const newData: Partial<Boards> = { is_archive: value };      
-      const archiveBoard = await boardRepository.updateBoardByIdAsync(boardId, {...board, ...newData});
-      
+      const newData: Partial<Boards> = { is_archive: value };
+      const archiveBoard = await boardRepository.updateBoardByIdAsync(boardId, { ...board, ...newData });
+
       if (!archiveBoard) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -102,7 +102,7 @@ export const BoardService = {
   },
   addMembers: async (boardId: string, userIds: string[]): Promise<ServiceResponse<BoardMembers[] | BoardMembers | null>> => {
     try {
-      const board = await boardRepository.findByIdAsync(boardId); 
+      const board = await boardRepository.findByIdAsync(boardId);
       if (!board) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -227,8 +227,8 @@ export const BoardService = {
       );
     }
   },
-  createList: async (userId: string, boardId: string, listData: Lists): Promise<ServiceResponse<Lists | null>> => {
-    try {      
+  createList: async (boardId: string, listData: Lists): Promise<ServiceResponse<Lists | null>> => {
+    try {
       const board = await boardRepository.findByIdAsync(boardId)
       if (!board) {
         return new ServiceResponse(
@@ -266,4 +266,49 @@ export const BoardService = {
       );
     }
   },
+  sortList: async (boardId: string, sortListIds: string[]): Promise<ServiceResponse<Lists[] | null>> => {
+    try {
+      const board = await boardRepository.findByBoardIdAndRelationAsync(boardId, ['lists'])
+    if (!board) {
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        "Board ID: Not found",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+    board.lists.forEach(list => {
+      sortListIds.forEach( (listId, index) => {
+        if (listId === list.id) list.position = index + 1;
+        
+      })
+    })
+
+    const sortedList = await boardRepository.updateBoardByIdAsync(boardId, board);
+    if (!sortedList) {
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        "Error sorting list",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }    
+
+    return new ServiceResponse<Lists[]>(
+      ResponseStatus.Success,
+      "Sorted lists successfully!",
+      board.lists,
+      StatusCodes.CREATED
+    );
+    } catch (ex) {
+      const errorMessage = `Error sorting list: ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+
+  }
 };

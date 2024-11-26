@@ -31,16 +31,16 @@ export class Boards extends DateTimeEntity {
   @Column({ type: "enum", enum: VisibilityType, default: VisibilityType.WORKSPACE})
   public visibility: VisibilityType;
 
+  @Column({ type: "boolean", default: false })
+  public is_archive: boolean;
+  
   @ManyToOne(() => Users, (user) => user.boards)
   user: Users
 
-  @Column({ type: "boolean", default: false })
-  public is_archive: boolean;
-
-  @OneToMany(() => Lists, (lists) => lists.boardID)
+  @OneToMany(() => Lists, (lists) => lists.boardID, {cascade: true})
   lists: Lists[];
 
-  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.boardID)
+  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.boardID, {cascade: true})
   boardMembers: BoardMembers[];
   
   @ManyToOne(() => Projects, (projects) => projects.boards)

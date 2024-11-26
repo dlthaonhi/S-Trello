@@ -4,9 +4,7 @@ import { ResponseStatus } from "../../services/serviceResponse";
 import { handleServiceResponse } from "../../services/httpHandlerResponse";
 import type { AuthenticatedRequest } from "../../middleware/authentication"
 import { BoardService } from "./board.service";
-import { Projects } from "../../model/projects/projects.entity";
 import { Boards } from "@/model/projects/boards.entity";
-import { VisibilityType } from "@/model/base/enumType.entity";
 import { Lists } from "@/model/projects/lists.entity";
 
 export const BoardController = {
@@ -107,10 +105,29 @@ export const BoardController = {
     if (!listData.title) 
       throw new Error ("Missing some non-nullable field")
     try {
-      const serviceResponse = await BoardService.createList(userId, boardId, listData);
+      const serviceResponse = await BoardService.createList(boardId, listData);
       handleServiceResponse(serviceResponse, res);
     } catch (error) {
       const errorMessage = `Error creating list: ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  },
+
+  async sortList(req: AuthenticatedRequest, res: Response) {
+    const userId: string | any = req.id;
+    const boardId: string | any = req.params.boardId;
+    const sortedListIds: string[] = req.body.sortedListIds;
+    if (!sortedListIds) 
+      throw new Error ("Missing some non-nullable field")
+    try {
+      const serviceResponse = await BoardService.sortList(boardId, sortedListIds);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      const errorMessage = `Error sorting list: ${(error as Error).message}`;
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         status: ResponseStatus.Failed,
         message: errorMessage,

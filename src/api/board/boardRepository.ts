@@ -12,6 +12,13 @@ export const boardRepository = dataSource.getRepository(Boards).extend({
     return this.findOneBy({ id: id });
   },
 
+  async findByBoardIdAndRelationAsync(boardId: string, relations: string[]): Promise<Boards | null> {
+    return this.findOne({
+      where: {  id: boardId },
+      relations: relations,
+    });
+  },
+
   async createBoardAsync(newData: Partial<Boards>): Promise<Boards | null > {  
     const newBoard = this.create(newData);
     return this.save(newBoard);

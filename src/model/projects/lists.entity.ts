@@ -25,7 +25,7 @@ export class Lists extends DateTimeEntity {
   @Column({ type: "boolean", default: false })
   public is_archive: boolean;
 
-  @OneToMany(() => Cards, (cards) => cards.listID)
+  @OneToMany(() => Cards, (cards) => cards.listID, {cascade: true})
   public cards: Cards[];
 
   @ManyToOne(() => Boards, (boards) => boards.lists)

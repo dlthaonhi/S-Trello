@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class  $npmConfigName1732369870379 implements MigrationInterface {
-    name = ' $npmConfigName1732369870379'
+export class  $npmConfigName1732619474386 implements MigrationInterface {
+    name = ' $npmConfigName1732619474386'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`ALTER TABLE \`card_members\` DROP FOREIGN KEY \`FK_e635eb7677b92b43c746afb0c33\``);
