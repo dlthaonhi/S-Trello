@@ -14,6 +14,8 @@ import { boardMemberRepository, boardRepository } from "../board/boardRepository
 import { Lists } from "@/model/projects/lists.entity";
 import { btoa } from "buffer";
 import { listRepository } from "../list/listRepository";
+import { Cards } from "@/model/projects/cards.entity";
+import { cardRepository } from "../card/cardRepository";
 
 export const ListService = {
   updateList: async (listId: string, newData: Partial<Lists>): Promise<ServiceResponse<Lists | null>> => {
@@ -97,46 +99,46 @@ export const ListService = {
         errorMessage,
         null,
         StatusCodes.INTERNAL_SERVER_ERROR
+      ); 
+    }
+  },
+  createCard: async (listId: string, cardData: Cards): Promise<ServiceResponse<Cards | null>> => {
+    try {      
+      const list = await listRepository.findByIdAsync(listId)
+      if (!list) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "List ID: Not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      cardData.listID = list;
+      cardData.position = await cardRepository.countCardsByListIdAsync(listId) + 1;
+      const createdCard = await cardRepository.createCardAsync(cardData);
+      if (!createdCard) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error creating card",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      return new ServiceResponse<Cards>(
+        ResponseStatus.Success,
+        "New card's created successfully!",
+        createdCard,
+        StatusCodes.CREATED
+      );
+    } catch (ex) {
+      const errorMessage = `Error creating card: ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
   },
-//   createList: async (userId: string, boardId: string, listData: Lists): Promise<ServiceResponse<Lists | null>> => {
-//     try {      
-//       const board = await boardRepository.findByIdAsync(boardId)
-//       if (!board) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Board ID: Not found",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
-//       }
-//       listData.boardID = board;
-//       listData.position = await listRepository.countListsByBoardIdAsync(boardId) + 1;
-//       const createdList = await listRepository.createListAsync(listData);
-//       if (!createdList) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Error creating list",
-//           null,
-//           StatusCodes.INTERNAL_SERVER_ERROR
-//         );
-//       }
-
-//       return new ServiceResponse<Lists>(
-//         ResponseStatus.Success,
-//         "New list's created successfully!",
-//         createdList,
-//         StatusCodes.CREATED
-//       );
-//     } catch (ex) {
-//       const errorMessage = `Error creating list: ${(ex as Error).message}`;
-//       return new ServiceResponse(
-//         ResponseStatus.Failed,
-//         errorMessage,
-//         null,
-//         StatusCodes.INTERNAL_SERVER_ERROR
-//       );
-//     }
-//   },
 };

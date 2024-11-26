@@ -20,11 +20,11 @@ export class Cards extends DateTimeEntity {
   @Column({ type: "varchar", length: 255 })
   public title: string;
 
-  @Column({ type: "int", default: 0 })
+  @Column({ type: "int", default: 0, nullable: true })
   public description: Int32;
 
-  @Column({ type: "int", default: 0 })
-  public position: Int32;
+  @Column({ type: "int", default: 0, nullable: true })
+  public position: number;
 
   @Column({ type: "varchar", length: 255, nullable: true })
   public coverUrl: string;
