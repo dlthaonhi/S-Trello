@@ -12,8 +12,8 @@ export const listRepository = dataSource.getRepository(Lists).extend({
   },
 
   async createListAsync(newData: Partial<Lists>): Promise<Lists | null > {  
-    const newBoard = this.create(newData);
-    return this.save(newBoard);
+    const newList = this.create(newData);
+    return this.save(newList);
   },
 
   async updateListByIdAsync(  
