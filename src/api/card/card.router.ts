@@ -8,8 +8,8 @@ cardRouter.put("/:cardId", CardController.updateCard);
 cardRouter.patch("/archive/:cardId", CardController.archiveCard);
 cardRouter.patch("/unarchive/:cardId", CardController.unarchiveCard);
 
-// cardRouter.post("/member/:cardId", canAccessBy("project","member", "admin"), CardController.addMember);
-// cardRouter.delete("/member/:cardId",canAccessBy("project","member", "admin"), CardController.removeMember);
+cardRouter.post("/:cardId/assign", CardController.assignMember);
+cardRouter.delete("/:cardId/unassign", CardController.unassignMember);
 
 // cardRouter.post("/:cardId/board", canAccessBy("project","admin"), CardController.createBoard)
 

@@ -4,7 +4,12 @@ import {
   ResponseStatus,
 } from "../../services/serviceResponse";
 import { StatusCodes } from "http-status-codes";
-import { cardRepository } from "./cardRepository";
+import { cardMemberRepository, cardRepository } from "./cardRepository";
+import { CardMembers } from "@/model/projects/cardMembers.entity";
+import { userRepository } from "../user/userRepository";
+import { projectMemberRepository } from "../project/projectRepository";
+import { boardMemberRepository } from "../board/boardRepository";
+import { listRepository } from "../list/listRepository";
 
 export const CardService = {
   updateCard: async (cardId: string, newData: Partial<Cards>): Promise<ServiceResponse<Cards | null>> => {
@@ -91,132 +96,143 @@ export const CardService = {
       );
     }
   },
-//   addMembers: async (projectId: string, userIds: string[]): Promise<ServiceResponse<projectMembers[] | projectMembers | null>> => {
-//     try {
-//       const project = await projectRepository.findByIdAsync(projectId);
-//       if (!project) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Project ID: not found",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
-//       }
+  assignMembers: async (cardId: string, userIds: string[]): Promise<ServiceResponse<CardMembers[] | null>> => {
+    try {
+      const card = await cardRepository.findByCardIdAndRelationAsync(cardId, ['listID']);
+      if (!card) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Card ID: not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      const list = await listRepository.findByListIdAndRelationAsync(card.listID.id, ['boardID']);
+      if (!list) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "List ID: not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      let tempMem: Partial<CardMembers>[] = []
+      for (const userId of userIds) {
+        const existedMem = await cardMemberRepository.findByCardAndUserIdAsync(cardId, userId)
+        if (!existedMem) {
+          const user = await userRepository.findByIdAsync(userId);
+          if (!user) {
+            return new ServiceResponse(
+              ResponseStatus.Failed,
+              `User ID: ${userId} not found`,
+              null,
+              StatusCodes.BAD_REQUEST
+            );
+          }
 
-//       let tempMem: Partial<projectMembers>[] = []
-//       for (const userId of userIds) {
-//         const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userId)
-//         if (!existedMem) {
-//           const user = await userRepository.findByIdAsync(userId);
-//           if (!user) {
-//             return new ServiceResponse(
-//               ResponseStatus.Failed,
-//               `User ID: ${userId} not found`,
-//               null,
-//               StatusCodes.BAD_REQUEST
-//             );
-//           }
+          const validUser = await boardMemberRepository.findByBoardAndUserIdAsync(list.boardID.id, userId)
 
-//           const addMem: Partial<projectMembers> = {
-//             userID: user,
-//             role: RoleType.MEMBER,
-//             projectID: project
-//           };
+          if (validUser) {
+            const addMem: Partial<CardMembers> = {
+              userID: user,
+              cardID: card
+            };  
+            tempMem.push(addMem);
+          }
+          else console.log(`Member with ID ${userId} isn't existed in this board. Add member to board before assigning`);
 
-//           tempMem.push(addMem);
-//         }
-//         else console.log(`Member with ID ${userId} 's existed in this project`);
+        }
+        else console.log(`Member with ID ${userId} 's existed in this card`);
 
-//       }
-//       const addedMems = await projectMemberRepository.createManyProjectMembersAsync(tempMem);
-//       if (addedMems === undefined || addedMems === null)
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Error adding member(s)",
-//           null,
-//           StatusCodes.INTERNAL_SERVER_ERROR
-//         );
+      }
+      const addedMems = await cardMemberRepository.createManyCardMembersAsync(tempMem);
+      if (addedMems === undefined || addedMems === null)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error assigning member(s)",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
 
-//       if (!addedMems.length)
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "All users is existed in this project",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
+      if (!addedMems.length)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "All users is existed in this card",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
 
-//       return new ServiceResponse<projectMembers[] | projectMembers>(
-//         ResponseStatus.Success,
-//         "Project member(s) added successfully!",
-//         addedMems,
-//         StatusCodes.OK
-//       );
+      return new ServiceResponse<CardMembers[]>(
+        ResponseStatus.Success,
+        "Card member(s) assigned successfully!",
+        addedMems,
+        StatusCodes.OK
+      );
 
-//     } catch (ex) {
-//       const errorMessage = `Error adding member(s): ${(ex as Error).message}`;
-//       return new ServiceResponse(
-//         ResponseStatus.Failed,
-//         errorMessage,
-//         null,
-//         StatusCodes.INTERNAL_SERVER_ERROR
-//       );
-//     }
-//   },
-//   removeMembers: async (projectId: string, userIds: string[] | string): Promise<ServiceResponse<projectMembers[] | projectMembers | null>> => {
-//     try {
-//       const project = await projectMemberRepository.findByProjectIdAsync(projectId);
-//       if (!project) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Project ID: not found",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
-//       }
+    } catch (ex) {
+      const errorMessage = `Error assigning member(s): ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
+  unassignMembers: async (cardId: string, userIds: string[] | string): Promise<ServiceResponse<CardMembers[] | null>> => {
+    try {
+      const card = await cardMemberRepository.findByCardIdAsync(cardId);
+      if (!card) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Card ID: not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
 
-//       let removedMems: projectMembers[] = []
-//       for (const userId of userIds) {
-//         const existedMem = await projectMemberRepository.findByProjectAndUserIdAsync(projectId, userId)
-//         if (existedMem) {
-//           const removedUser = await projectMemberRepository.deleteProjectMembersAsync(projectId, userId)
-//           if (removedUser) removedMems.push(removedUser);
-//         }
-//         else console.log(`User with ID ${userId} isn't existed in this project`);
-//       }
-//       if (removedMems === undefined || removedMems === null)
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Error removing member(s) from this project",
-//           null,
-//           StatusCodes.INTERNAL_SERVER_ERROR
-//         );
+      let removedMems: CardMembers[] = []
+      for (const userId of userIds) {
+        const existedMem = await cardMemberRepository.findByCardAndUserIdAsync(cardId, userId)
+        if (existedMem) {
+          const removedUser = await cardMemberRepository.deleteCardMembersAsync(cardId, userId)
+          if (removedUser) removedMems.push(removedUser);
+        }
+        else console.log(`User with ID ${userId} isn't existed in this card`);
+      }
+      if (removedMems === undefined || removedMems === null)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error removing member(s) from this card",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
 
-//       if (!removedMems.length)
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "All users isn't existed in this project",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
+      if (!removedMems.length)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "All users isn't existed in this card",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
 
+      return new ServiceResponse<CardMembers[]>(
+        ResponseStatus.Success,
+        "Card member(s) removed successfully!",
+        removedMems,
+        StatusCodes.OK
+      );
 
-//       return new ServiceResponse<projectMembers[] | projectMembers>(
-//         ResponseStatus.Success,
-//         "Project member(s) removed successfully!",
-//         removedMems,
-//         StatusCodes.OK
-//       );
-
-//     } catch (ex) {
-//       const errorMessage = `Error removing member(s): ${(ex as Error).message}`;
-//       return new ServiceResponse(
-//         ResponseStatus.Failed,
-//         errorMessage,
-//         null,
-//         StatusCodes.INTERNAL_SERVER_ERROR
-//       );
-//     }
-//   },
+    } catch (ex) {
+      const errorMessage = `Error removing member(s): ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
 //   createBoard: async (userId: string, projectId: string, boardData: Boards): Promise<ServiceResponse<Boards | null>> => {
 //     try {      
 //       const user = await userRepository.findByIdAsync(userId);

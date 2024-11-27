@@ -17,9 +17,6 @@ export class CardMembers extends DateTimeEntity {
   @PrimaryGeneratedColumn("uuid")
   public id: string;
 
-  @Column({ type: "enum", enum: RoleType, default: RoleType.MEMBER })
-  public role: RoleType;
-
   @ManyToOne(() => Cards, (cards) => cards.cardMembers)
   public cardID: Cards;
 

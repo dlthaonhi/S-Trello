@@ -53,47 +53,45 @@ export const CardController = {
       });
     }
   },
-//   async addMember(req: AuthenticatedRequest, res: Response) {
-//     // const userId:string | any = req.id;  // for notification api
-//     try {
-//       const projectId: string | any = req.params.projectId;
-//       const userId: string[] | string = req.body.userId;
-//       if (userId == undefined || userId == null)
-//         throw new Error("Missing some non-nullable field")
+  async assignMember(req: AuthenticatedRequest, res: Response) {
+    try {
+      const cardId: string | any = req.params.cardId;
+      const userId: string[] | string = req.body.assignees;
+      if (userId == undefined || userId == null)
+        throw new Error("Missing some non-nullable field")
 
-//       let userIds: string[] = (typeof (userId) == 'string') ? [userId] : userId;
-//       if(!userIds.length) 
-//         throw new Error("Missing userId")
-//       const serviceResponse = await ProjectService.addMembers(projectId, userIds);
-//       handleServiceResponse(serviceResponse, res);
-//     } catch (error: any) {
-//       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//         status: ResponseStatus.Failed,
-//         message: error.message,
-//         data: null,
-//       });
-//     }
-//   },
-//   async removeMember(req: AuthenticatedRequest, res: Response) {
-//     try {
-//       // const userId:string | any = req.id;  // for notification api
-//       const projectId: string | any = req.params.projectId;
-//       const userId: string[] | string = req.body.userId;
-//       if (userId == undefined || userId == null)
-//         throw new Error("Missing some non-nullable field")
-//       let userIds: string[] = (typeof (userId) == 'string') ? [userId] : userId;
-//       if(!userIds.length) 
-//         throw new Error("Missing userId")
-//       const serviceResponse = await ProjectService.removeMembers(projectId, userIds);
-//       handleServiceResponse(serviceResponse, res);
-//     } catch (error: any) {
-//       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//         status: ResponseStatus.Failed,
-//         message: error.message,
-//         data: null,
-//       });
-//     }
-//   },
+      let userIds: string[] = (typeof (userId) == 'string') ? [userId] : userId;
+      if(!userIds.length) 
+        throw new Error("Missing assignees with userId(s)")
+      const serviceResponse = await CardService.assignMembers(cardId, userIds);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error: any) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
+  async unassignMember(req: AuthenticatedRequest, res: Response) {
+    try {
+      const cardId: string | any = req.params.cardId;
+      const userId: string[] | string = req.body.unassignees;
+      if (userId == undefined || userId == null)
+        throw new Error("Missing some non-nullable field")
+      let userIds: string[] = (typeof (userId) == 'string') ? [userId] : userId;
+      if(!userIds.length) 
+        throw new Error("Missing userId")
+      const serviceResponse = await CardService.unassignMembers(cardId, userIds);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error: any) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: error.message,
+        data: null,
+      });
+    }
+  },
 //   async createBoard(req: AuthenticatedRequest, res: Response) {
 //     const userId: string | any = req.id;
 //     const projectId: string | any = req.params.projectId;
