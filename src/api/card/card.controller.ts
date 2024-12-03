@@ -114,23 +114,23 @@ export const CardController = {
       });
     }
   },
-//   async createBoard(req: AuthenticatedRequest, res: Response) {
-//     const userId: string | any = req.id;
-//     const projectId: string | any = req.params.projectId;
-//     const boardData: Boards = req.body;
-//     if (!boardData.title) 
-//       throw new Error ("Missing some non-nullable field")
-//     try {
-//       const serviceResponse = await ProjectService.createBoard(userId, projectId, boardData);
-//       handleServiceResponse(serviceResponse, res);
-//     } catch (error) {
-//       const errorMessage = `Error creating board: ${(error as Error).message}`;
-//       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//         status: ResponseStatus.Failed,
-//         message: errorMessage,
-//         data: null,
-//       });
-//     }
-//   },
+  async createComment(req: AuthenticatedRequest, res: Response) {
+    const userId: string | any = req.id;
+    const cardId: string | any = req.params.cardId;
+    const content: string = req.body.content;
+    if (!content) 
+      throw new Error ("Missing comment's content")
+    try {
+      const serviceResponse = await CardService.addComment(userId, cardId, content);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      const errorMessage = `Error creating comment: ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  },
 
 };

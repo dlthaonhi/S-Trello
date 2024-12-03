@@ -1,12 +1,10 @@
-// import { Router } from "express";
-// import { canAccessBy } from "@/middleware/checkRole";
-// import { ListController } from "./list.controller";
+import { Router } from "express";
+import { canAccessBy } from "@/middleware/checkRole";
+import { CommentController } from "./comment.controller";
 
-// const listRouter = Router();
+const commentRouter = Router();
 
-// listRouter.put("/:listId", canAccessBy("list","member", "admin"), ListController.updateList);
-// listRouter.patch("/archive/:listId", canAccessBy("list","member", "admin"), ListController.archiveList);
-// listRouter.patch("/unarchive/:listId", canAccessBy("list","member", "admin"), ListController.unarchiveList);
+commentRouter.put("/:commentId", CommentController.updateComment);
+commentRouter.delete("/:commentId", CommentController.deleteComment);
 
-// listRouter.post("/:listId/card",canAccessBy("list","member", "admin"), ListController.createCard)
-// export default listRouter;
+export default commentRouter;

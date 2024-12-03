@@ -11,8 +11,9 @@ cardRouter.patch("/unarchive/:cardId", CardController.unarchiveCard);
 cardRouter.post("/:cardId/assign", CardController.assignMember);
 cardRouter.delete("/:cardId/unassign", CardController.unassignMember);
 
-cardRouter.post("/:cardId/move", CardController.moveCard)
+cardRouter.post("/:cardId/move", CardController.moveCard);
 
+cardRouter.post("/:cardId/comment", CardController.createComment);
 
 
 export default cardRouter;

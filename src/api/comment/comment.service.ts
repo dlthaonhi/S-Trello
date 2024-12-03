@@ -1,54 +1,45 @@
-import { Users } from "../../model/users.entity";
+import { Comments } from "@/model/projects/comments.entity";
 import {
   ServiceResponse,
   ResponseStatus,
 } from "../../services/serviceResponse";
 import { StatusCodes } from "http-status-codes";
-import { userRepository } from "../../api/user/userRepository";
-import { RoleType, VisibilityType } from "../../model/base/enumType.entity";
-import { type } from "os";
-import { IsNull } from "typeorm";
-import { Boards } from "@/model/projects/boards.entity";
-import { BoardMembers } from "@/model/projects/boardMembers.entity";
-import { boardMemberRepository, boardRepository } from "../board/boardRepository";
-import { Lists } from "@/model/projects/lists.entity";
-import { btoa } from "buffer";
-import { listRepository } from "../list/listRepository";
-import { Cards } from "@/model/projects/cards.entity";
 import { cardRepository } from "../card/cardRepository";
+import { commentRepository } from "./commentRepository";
 
-export const ListService = {
-  updateList: async (listId: string, newData: Partial<Lists>): Promise<ServiceResponse<Lists | null>> => {
+export const CommentService = {
+  updateComment: async (commentId: string, newData: string): Promise<ServiceResponse<Comments | null>> => {
     try {
-      const list = await listRepository.findByIdAsync(listId);
-      
-      if (!list) {
+      const comment = await commentRepository.findByIdAsync(commentId);
+      if (!comment) {
         return new ServiceResponse(
           ResponseStatus.Failed,
-          "List ID: not found",
+          "Comment ID: not found",
           null,
           StatusCodes.BAD_REQUEST
         );
       }
 
-      const updatedList = await listRepository.updateListByIdAsync(listId, { ...list, ...newData });
-      if (!updatedList) {
+      comment.content = newData;
+
+      const updatedComment = await commentRepository.updateCommentByIdAsync(commentId, comment);
+      if (!updatedComment) {
         return new ServiceResponse(
           ResponseStatus.Failed,
-          "Error updating list",
+          "Error updating comment",
           null,
           StatusCodes.INTERNAL_SERVER_ERROR
         );
       }
 
-      return new ServiceResponse<Lists>(
+      return new ServiceResponse<Comments>(
         ResponseStatus.Success,
-        "List updated successfully!",
-        updatedList,
+        "Comment updated successfully!",
+        updatedComment,
         StatusCodes.CREATED
       );
     } catch (ex) {
-      const errorMessage = `Error updating list: ${(ex as Error).message}`;
+      const errorMessage = `Error updating comment: ${(ex as Error).message}`;
       return new ServiceResponse(
         ResponseStatus.Failed,
         errorMessage,
@@ -57,83 +48,36 @@ export const ListService = {
       );
     }
   },
-  archiveList: async (listId: string, value: boolean): Promise<ServiceResponse<Lists | null>> => {
+  deleteComment: async (commentId: string): Promise<ServiceResponse<Comments|null>> => {
     try {
-      const list = await listRepository.findByIdAsync(listId);
-      if (!list) 
+      const comment = await commentRepository.findByIdAsync(commentId);
+      if (!comment) {
         return new ServiceResponse(
           ResponseStatus.Failed,
-          "List ID: not found",
+          "Comment ID: not found",
           null,
           StatusCodes.BAD_REQUEST
         );
-      
-      if (list.is_archive == value) 
+      }
+
+      const deletedComment = await commentRepository.deleteCommentAsync(commentId);
+      if (!deletedComment) {
         return new ServiceResponse(
           ResponseStatus.Failed,
-          "List is already archived/ unarchived",
-          null,
-          StatusCodes.BAD_REQUEST
-        );
-      const newData: Partial<Lists> = { is_archive: value };      
-      const archiveList = await listRepository.updateListByIdAsync(listId, {...list, ...newData});
-      
-      if (!archiveList) {
-        return new ServiceResponse(
-          ResponseStatus.Failed,
-          "Error updating archive status",
+          "Error deleting comment",
           null,
           StatusCodes.INTERNAL_SERVER_ERROR
         );
       }
 
-      return new ServiceResponse<Lists>(
+      return new ServiceResponse<Comments>(
         ResponseStatus.Success,
-        "List archive status updated successfully!",
-        archiveList,
-        StatusCodes.OK
-      );
-    } catch (ex) {
-      const errorMessage = `Error updating archive status: ${(ex as Error).message}`;
-      return new ServiceResponse(
-        ResponseStatus.Failed,
-        errorMessage,
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR
-      ); 
-    }
-  },
-  createCard: async (listId: string, cardData: Cards): Promise<ServiceResponse<Cards | null>> => {
-    try {      
-      const list = await listRepository.findByIdAsync(listId)
-      if (!list) {
-        return new ServiceResponse(
-          ResponseStatus.Failed,
-          "List ID: Not found",
-          null,
-          StatusCodes.BAD_REQUEST
-        );
-      }
-      cardData.listID = list;
-      cardData.position = await cardRepository.countCardsByListIdAsync(listId) + 1;
-      const createdCard = await cardRepository.createCardAsync(cardData);
-      if (!createdCard) {
-        return new ServiceResponse(
-          ResponseStatus.Failed,
-          "Error creating card",
-          null,
-          StatusCodes.INTERNAL_SERVER_ERROR
-        );
-      }
-
-      return new ServiceResponse<Cards>(
-        ResponseStatus.Success,
-        "New card's created successfully!",
-        createdCard,
+        "Comment deleted successfully!",
+        deletedComment,
         StatusCodes.CREATED
       );
     } catch (ex) {
-      const errorMessage = `Error creating card: ${(ex as Error).message}`;
+      const errorMessage = `Error deleting comment: ${(ex as Error).message}`;
       return new ServiceResponse(
         ResponseStatus.Failed,
         errorMessage,
@@ -141,5 +85,5 @@ export const ListService = {
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
-  },
+  }
 };

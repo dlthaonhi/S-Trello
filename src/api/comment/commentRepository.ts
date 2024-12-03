@@ -7,22 +7,22 @@ export const commentRepository = dataSource.getRepository(Comments).extend({
 //     return this.find();
 // //   },
 
-//   async findByIdAsync(id: string): Promise<Lists | null> {
-//     return this.findOneBy({ id: id });
-//   },
+  async findByIdAsync(id: string): Promise<Comments | null> {
+    return this.findOneBy({ id: id });
+  },
 
   async createCommentAsync(newData: Partial<Comments>): Promise<Comments | null > {  
     const newComment = this.create(newData);
     return this.save(newComment);
   },
 
-//   async updateListByIdAsync(  
-//     id: string,
-//     updateData: Partial<Lists>
-//   ): Promise<Lists | null> {
-//       await this.save(updateData);
-//     return this.findOneBy({id});
-//   },
+  async updateCommentByIdAsync(  
+    id: string,
+    updateData: Partial<Comments>
+  ): Promise<Comments | null> {
+      await this.save(updateData);
+    return this.findOneBy({id});
+  },
 
 //   async findByListIdAndRelationAsync(listId: string, relations: string[]): Promise<Lists | null> {
 //     return this.findOne({
@@ -31,7 +31,11 @@ export const commentRepository = dataSource.getRepository(Comments).extend({
 //     });
 //   },
 
-//   async countListsByBoardIdAsync(boardId: string): Promise<number> {
-//     return this.count({ where: {boardID: {id: boardId}}})
-//   }
+async deleteCommentAsync (commentId: string): Promise<Comments | null> {
+  const removeItem = await this.findOne({
+    where: { id: commentId },
+  })
+  if(!removeItem) return null;
+  return await this.remove(removeItem);
+},
 });
