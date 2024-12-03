@@ -95,7 +95,7 @@ export const ProjectService = {
         ResponseStatus.Success,
         "Project updated successfully!",
         updatedProject,
-        StatusCodes.CREATED
+        StatusCodes.OK
       );
     } catch (ex) {
       const errorMessage = `Error updating project: ${(ex as Error).message}`;
@@ -290,6 +290,7 @@ export const ProjectService = {
           StatusCodes.BAD_REQUEST
         );
       }
+
       const project = await projectRepository.findByIdAsync(projectId)
       if (!project) {
         return new ServiceResponse(
@@ -299,6 +300,7 @@ export const ProjectService = {
           StatusCodes.BAD_REQUEST
         );
       }
+      
       boardData.user = user;
       boardData.project = project;
       if (!boardData.visibility) boardData.visibility = VisibilityType.WORKSPACE;

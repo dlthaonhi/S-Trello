@@ -92,6 +92,28 @@ export const CardController = {
       });
     }
   },
+  async moveCard(req: AuthenticatedRequest, res: Response) {
+    const userId: string | any = req.id;
+    const cardId: string | any = req.params.cardId;
+    const data = {
+      newPosition: req.body.position,
+      newList: req.body.listId,
+      newBoard: req.body.boardId
+    }
+    // if (!boardData.title) 
+    //   throw new Error ("Missing some non-nullable field")
+    try {
+      const serviceResponse = await CardService.moveCard(cardId, data.newList, data.newBoard, data.newPosition);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      const errorMessage = `Error moving card: ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  },
 //   async createBoard(req: AuthenticatedRequest, res: Response) {
 //     const userId: string | any = req.id;
 //     const projectId: string | any = req.params.projectId;

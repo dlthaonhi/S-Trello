@@ -32,9 +32,23 @@ export const cardRepository = dataSource.getRepository(Cards).extend({
     });
   },
 
+  async findByListIdAndPositionAsync(listId: string, position: number): Promise<Cards | null> {
+    return this.findOne({
+      where: {  listID: {id: listId}, position: position }
+    });
+  },
+
   async countCardsByListIdAsync(listId: string): Promise<number> {
     return this.count({ where: {listID: {id: listId}}})
-  }
+  },
+
+  async deleteCardAsync (cardId: string): Promise<Cards | null> {
+    const removeItem = await this.findOne({
+      where: { id: cardId },
+    });
+    if(!removeItem) return null;
+    return await this.remove(removeItem);
+  },
 });
 
 export const cardMemberRepository = dataSource.getRepository(CardMembers).extend({
@@ -42,11 +56,18 @@ export const cardMemberRepository = dataSource.getRepository(CardMembers).extend
     //   return this.find();
     // },
   
-    // async findAllByBoardIdAsync(boardId: string): Promise<BoardMembers[]> {
-    //   return this.find({
-    //       where: { boardID: { id: boardId }}
-    //   });
-    // },
+    async findAllByCardIdAsync(cardId: string): Promise<CardMembers[]> {
+      return this.find({
+          where: { cardID: { id: cardId }}
+      });
+    },
+
+    async findAllByCardIdAndRelationAsync(cardId: string, relations: string[]): Promise<CardMembers[]> {
+      return this.find({
+          where: { cardID: { id: cardId }},
+          relations: relations
+      });
+    },
   
     // async findByIdAsync(id: string): Promise<BoardMembers | null> {
     //   return this.findOneBy({ id: id });

@@ -49,6 +49,13 @@ export const boardMemberRepository = dataSource.getRepository(BoardMembers).exte
     });
   },
 
+  async findAllByBoardIdAndRelationAsync(boardId: string, relations: string[]): Promise<BoardMembers[]> {
+    return this.find({
+        where: { boardID: { id: boardId }},
+        relations: relations
+    });
+  },
+
   async findByIdAsync(id: string): Promise<BoardMembers | null> {
     return this.findOneBy({ id: id });
   },

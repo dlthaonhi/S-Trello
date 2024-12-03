@@ -7,9 +7,11 @@ import { StatusCodes } from "http-status-codes";
 import { cardMemberRepository, cardRepository } from "./cardRepository";
 import { CardMembers } from "@/model/projects/cardMembers.entity";
 import { userRepository } from "../user/userRepository";
-import { projectMemberRepository } from "../project/projectRepository";
 import { boardMemberRepository } from "../board/boardRepository";
 import { listRepository } from "../list/listRepository";
+import positionService from "../../services/positionService";
+import { Comments } from "@/model/projects/comments.entity";
+import { commentRepository } from "../comment/commentRepository";
 
 export const CardService = {
   updateCard: async (cardId: string, newData: Partial<Cards>): Promise<ServiceResponse<Cards | null>> => {
@@ -24,7 +26,7 @@ export const CardService = {
         );
       }
 
-      const updatedCard= await cardRepository.updateCardByIdAsync(cardId, { ...card, ...newData });
+      const updatedCard = await cardRepository.updateCardByIdAsync(cardId, { ...card, ...newData });
       if (!updatedCard) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -52,25 +54,25 @@ export const CardService = {
   },
   archiveCard: async (cardId: string, value: boolean): Promise<ServiceResponse<Cards | null>> => {
     try {
-        const card = await cardRepository.findByIdAsync(cardId);
-        if (!card) {
-          return new ServiceResponse(
-            ResponseStatus.Failed,
-            "Card ID: not found",
-            null,
-            StatusCodes.BAD_REQUEST
-          );
-        }
-      
-      if (card.is_archive == value) 
+      const card = await cardRepository.findByIdAsync(cardId);
+      if (!card) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Card ID: not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+
+      if (card.is_archive == value)
         return new ServiceResponse(
           ResponseStatus.Failed,
           "Card is already archived/ unarchived",
           null,
           StatusCodes.BAD_REQUEST
         );
-      const newData: Partial<Cards> = { is_archive: value };      
-      const archiveCard = await cardRepository.updateCardByIdAsync(cardId, {...card, ...newData});
+      const newData: Partial<Cards> = { is_archive: value };
+      const archiveCard = await cardRepository.updateCardByIdAsync(cardId, { ...card, ...newData });
       if (!archiveCard) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -136,7 +138,7 @@ export const CardService = {
             const addMem: Partial<CardMembers> = {
               userID: user,
               cardID: card
-            };  
+            };
             tempMem.push(addMem);
           }
           else console.log(`Member with ID ${userId} isn't existed in this board. Add member to board before assigning`);
@@ -179,7 +181,7 @@ export const CardService = {
       );
     }
   },
-  unassignMembers: async (cardId: string, userIds: string[] | string): Promise<ServiceResponse<CardMembers[] | null>> => {
+  unassignMembers: async (cardId: string, userIds: string[]): Promise<ServiceResponse<CardMembers[] | null>> => {
     try {
       const card = await cardMemberRepository.findByCardIdAsync(cardId);
       if (!card) {
@@ -233,103 +235,244 @@ export const CardService = {
       );
     }
   },
-//   createBoard: async (userId: string, projectId: string, boardData: Boards): Promise<ServiceResponse<Boards | null>> => {
-//     try {      
-//       const user = await userRepository.findByIdAsync(userId);
-//       if (!user) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "UserID: Not found",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
-//       }
-//       const project = await projectRepository.findByIdAsync(projectId)
-//       if (!project) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "ProjectID: Not found",
-//           null,
-//           StatusCodes.BAD_REQUEST
-//         );
-//       }
-//       boardData.user = user;
-//       boardData.project = project;
-//       if (!boardData.visibility) boardData.visibility = VisibilityType.WORKSPACE;
-//       const createdBoard = await boardRepository.createBoardAsync(boardData);
-//       if (!createdBoard) {
-//         return new ServiceResponse(
-//           ResponseStatus.Failed,
-//           "Error creating board",
-//           null,
-//           StatusCodes.INTERNAL_SERVER_ERROR
-//         );
-//       }
+  moveCard: async (cardId: string, newListId: string, newBoardId: string, newPosition: number | null): Promise<ServiceResponse<Cards | null>> => {
+    try {
+      const card = await cardRepository.findByCardIdAndRelationAsync(cardId, ['listID']);
+      if (!card) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Card ID: not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
 
-//       if (boardData.visibility === VisibilityType.WORKSPACE) {
-//         const projectMembers = await projectMemberRepository.findAllByProjectIdAsync(projectId, ["userID"]);
-//         console.log(projectMembers);
-        
-//         const boardMembers: Partial<BoardMembers>[] = projectMembers.map(projectMember => {
-//           let boardMember: Partial<BoardMembers> ;
-//           if (projectMember.userID.id == userId) {
-//             boardMember = {
-//               role: RoleType.ADMIN,
-//               userID: projectMember.userID,
-//               boardID: createdBoard
-//             }
-//           }
-//           else {
-//             boardMember= {
-//               role: RoleType.MEMBER,
-//               userID: projectMember.userID,
-//               boardID: createdBoard
-//             }
-//           }
-        
-//           return boardMember;
-//         })
-//         const createdMem = await boardMemberRepository.createManyBoardMembersAsync(boardMembers)
-//         if (!createdMem) {
-//           return new ServiceResponse(
-//             ResponseStatus.Failed,
-//             "Error creating board members",
-//             null,
-//             StatusCodes.INTERNAL_SERVER_ERROR
-//           );
-//         }
-//       }
-//       if (boardData.visibility === VisibilityType.PRIVATE) {
-//         const adminData = {
-//           role: RoleType.ADMIN,
-//           userID: user,
-//           boardID: createdBoard
-//         }
-//         const createdMem = await boardMemberRepository.creatBoardMemberAsync(adminData);
-//         if (!createdMem) {
-//           return new ServiceResponse(
-//             ResponseStatus.Failed,
-//             "Error creating board admin",
-//             null,
-//             StatusCodes.INTERNAL_SERVER_ERROR
-//           );
-//         }
-//       }
+      const oldListId = card.listID.id;
+      const oldList = await listRepository.findByListIdAndRelationAsync(oldListId,['boardID'] )
+      if (!oldList) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "List ID of card: not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      const newList = await listRepository.findByListIdAndRelationAsync(newListId, ['boardID']);
+      if (!newList) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "List ID: not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
 
-//       return new ServiceResponse<Boards>(
-//         ResponseStatus.Success,
-//         "New board's created successfully!",
-//         createdBoard,
-//         StatusCodes.CREATED
-//       );
-//     } catch (ex) {
-//       const errorMessage = `Error creating board: ${(ex as Error).message}`;
-//       return new ServiceResponse(
-//         ResponseStatus.Failed,
-//         errorMessage,
-//         null,
-//         StatusCodes.INTERNAL_SERVER_ERROR
-//       );
-//     }
-//   },
+      if (newList.boardID.id !== newBoardId) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Provided board ID: not associated with list ID",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+
+      const oldBoardId = oldList.boardID.id;
+      console.log("oldListId", oldListId);
+      console.log("newListId", newListId);
+      
+      
+      //The same list
+      if (oldListId === newListId) {
+        if (!newPosition) newPosition = card.position;
+        const movedCard = await CardService.changeCardPosition(newPosition, card, newListId);
+        if (!movedCard) {
+          return new ServiceResponse(
+            ResponseStatus.Failed,
+            "Error moving card",
+            null,
+            StatusCodes.INTERNAL_SERVER_ERROR
+          );
+        }
+        return new ServiceResponse<Cards>(
+          ResponseStatus.Success,
+          "Card moved successfully",
+          card,
+          StatusCodes.CREATED
+        );
+      }
+
+      //Another list
+      // Different board
+      console.log("oldBoardId",oldBoardId);
+      console.log("newBoardId",newBoardId);
+      
+      if (oldBoardId !== newBoardId) {
+        console.log("Diffent board");
+        const cardMembers = await cardMemberRepository.findAllByCardIdAndRelationAsync(cardId, ['userID']);
+        const cardUserIds = cardMembers.map(mem => { return mem.userID.id })
+        console.log("cardUserIds", cardUserIds);
+        const boardMembers = await boardMemberRepository.findAllByBoardIdAndRelationAsync(newBoardId, ['userID']);
+        const boardUserIds = boardMembers.map(mem => { return mem.userID.id })
+        console.log("boardUserIds", boardUserIds);
+        for (const cardUserId of cardUserIds) {
+          if (!boardUserIds.includes(cardUserId)) {
+            const removedMem = await cardMemberRepository.deleteCardMembersAsync(cardId, cardUserId);
+            if (!removedMem) {
+              return new ServiceResponse(
+                ResponseStatus.Failed,
+                "Error removing user not in the new board",
+                null,
+                StatusCodes.INTERNAL_SERVER_ERROR
+              );
+            }
+          }
+        }
+        
+      }
+      //The same board
+      // check Position
+      const maxValidPosition = await cardRepository.countCardsByListIdAsync(newListId) + 1;
+      if (newPosition && newPosition > maxValidPosition) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          `The max position of this list is ${maxValidPosition}. Please enter a valid value`,
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+
+      if (!newPosition) newPosition = maxValidPosition;
+      card.listID = newList;
+      const oldPosition = card.position;
+      card.position = newPosition;
+      console.log("Old position", oldPosition);
+      console.log("New position", card.position);
+
+
+      const removedCardFromOldList = await positionService.remove(oldPosition, oldListId);
+      if (!removedCardFromOldList) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error removing card from current list",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+      const addedCardToNewList = await positionService.add(newPosition, maxValidPosition, newListId);
+      if (!addedCardToNewList) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error adding card to new list",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+      const movedCard = await cardRepository.updateCardByIdAsync(cardId, card);
+      if (!movedCard) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error moving card",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+      return new ServiceResponse<Cards>(
+        ResponseStatus.Success,
+        "Card moved successfully",
+        card,
+        StatusCodes.CREATED
+      );
+
+    } catch (ex) {
+      const errorMessage = `Error moving card: ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
+  changeCardPosition: async (newPosition: number, card: Cards, newListId: string): Promise<boolean> => {
+    try {
+      // check Position
+      const maxValidPosition = await cardRepository.countCardsByListIdAsync(newListId);
+      if (newPosition > maxValidPosition)
+        throw new Error(`The max position of this list is ${maxValidPosition}. Please enter a valid value`)
+
+      if (newPosition === card.position) {
+        console.log("The card is at the current location");
+        return true;
+      }
+      else {
+        console.log("card.position ... newPosition",card.position, newPosition);
+        
+        const changedPosition = card.position < newPosition ?
+          await positionService.increase(card.position, newPosition, newListId) :
+          await positionService.decrease(card.position, newPosition, newListId);
+        if (!changedPosition)
+          throw new Error("Error changing position card when moving");
+        card.position = newPosition;
+
+        const movedCard = await cardRepository.updateCardByIdAsync(card.id, card);
+        if (!movedCard) throw new Error("Error moving card")
+
+        return true;
+      }
+    } catch (error: any) {
+      console.log(error.message);
+      throw error;
+    }
+  },
+  addComment: async (cardId: string, userId: string, content: string ): Promise<ServiceResponse<Comments | null>> => {
+    try {
+      const card = await cardRepository.findByIdAsync(cardId)
+      if (!card) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Card ID: Not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      const user = await userRepository.findByIdAsync(userId)
+      if (!user) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "User ID: Not found",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      const commentData: Partial<Comments> = {
+        cardID:card,
+        userID: user,
+        content: content
+      }
+      const createdComment = await commentRepository.createCommentAsync(commentData);
+      if (!createdComment) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error creating comment",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      return new ServiceResponse<Comments>(
+        ResponseStatus.Success,
+        "New comment's added successfully!",
+        createdComment,
+        StatusCodes.CREATED
+      );
+    } catch (ex) {
+      const errorMessage = `Error creating comment: ${(ex as Error).message}`;
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
 };

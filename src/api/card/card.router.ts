@@ -11,7 +11,7 @@ cardRouter.patch("/unarchive/:cardId", CardController.unarchiveCard);
 cardRouter.post("/:cardId/assign", CardController.assignMember);
 cardRouter.delete("/:cardId/unassign", CardController.unassignMember);
 
-// cardRouter.post("/:cardId/board", canAccessBy("project","admin"), CardController.createBoard)
+cardRouter.post("/:cardId/move", CardController.moveCard)
 
 
 
