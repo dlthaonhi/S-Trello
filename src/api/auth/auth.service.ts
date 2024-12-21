@@ -14,6 +14,7 @@ import { verify } from "crypto";
 import { cache } from "../../services/cache";
 import { DateTimeEntity } from "@/model/base/datetime.entity";
 import CacheService from "../../services/redis.cache"
+import oAuthGoogleService from "@/services/oAuthGoogle.service";
 
 export const authService = {
   // Register new user
@@ -317,6 +318,34 @@ export const authService = {
       return new ServiceResponse(
         ResponseStatus.Failed,
         `Error activating user: ${(ex as Error).message}`,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
+
+  redirectGoogleConsentScreen: async(): Promise<ServiceResponse<string | null>> => {
+    try {
+      const url = await oAuthGoogleService.getRedirectConsentScreenURL();
+      if (!url) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error getting getRedirectConsentScreenURL",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      return new ServiceResponse(
+        ResponseStatus.Success,
+        "Success getting getRedirectConsentScreenURL",
+        url,
+        StatusCodes.OK
+      );
+    } catch (error: any) {
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        `Error activating user: ${error.message}`,
         null,
         StatusCodes.INTERNAL_SERVER_ERROR
       );

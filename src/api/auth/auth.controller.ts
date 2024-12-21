@@ -58,9 +58,22 @@ export const AuthController = {
       const serviceResponse = await authService.verifyUser(token);
       handleServiceResponse(serviceResponse, res);
     } catch (error) {
-      const errorMessage = `Error activating email: ${
-        (error as Error).message
-      }`;
+      const errorMessage = `Error activating email: ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+  },
+
+  async redirectGoogleConsentScreen(req: Request, res: Response){
+    try {
+      const serviceResponse = await authService.redirectGoogleConsentScreen();
+      // res.redirect(serviceResponse.data as string)
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      const errorMessage = `Error activating email: ${(error as Error).message}`;
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         status: ResponseStatus.Failed,
         message: errorMessage,
