@@ -103,6 +103,59 @@ export const ListService = {
       ); 
     }
   },
+   async deleteList(id: string): Promise<ServiceResponse<null>> {
+      try {
+        const result = await listRepository.softDelete(id);
+        if (!result.affected) {
+          return new ServiceResponse(
+            ResponseStatus.Failed,
+            "List not found",
+            null,
+            StatusCodes.NOT_FOUND
+          );
+        }
+        return new ServiceResponse(
+          ResponseStatus.Success,
+          "List deleted successfully",
+          null,
+          StatusCodes.OK
+        );
+      } catch (error) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          `Error deleting list: ${(error as Error).message}`,
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+    },
+  
+    async restoreList(id: string): Promise<ServiceResponse<null>> {
+      try {
+        const result = await listRepository.restore(id);
+        if (!result.affected) {
+          return new ServiceResponse(
+            ResponseStatus.Failed,
+            "List not found",
+            null,
+            StatusCodes.NOT_FOUND
+          );
+        }
+        return new ServiceResponse(
+          ResponseStatus.Success,
+          "List restored successfully",
+          null,
+          StatusCodes.OK
+        );
+      } catch (error) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          `Error restoring list: ${(error as Error).message}`,
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+    },
   createCard: async (listId: string, cardData: Cards): Promise<ServiceResponse<Cards | null>> => {
     try {      
       const list = await listRepository.findByIdAsync(listId)

@@ -7,6 +7,8 @@ const listRouter = Router();
 listRouter.put("/:listId", canAccessBy("list","member", "admin"), ListController.updateList);
 listRouter.patch("/archive/:listId", canAccessBy("list","member", "admin"), ListController.archiveList);
 listRouter.patch("/unarchive/:listId", canAccessBy("list","member", "admin"), ListController.unarchiveList);
+listRouter.delete("/:listId", ListController.deleteList); 
+listRouter.patch("/:listId/restore", ListController.restoreList);
 
 listRouter.post("/:listId/card",canAccessBy("list","member", "admin"), ListController.createCard)
 export default listRouter;

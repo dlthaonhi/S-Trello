@@ -58,6 +58,37 @@ export const ListController = {
       });
     }
   },
+  async deleteList(req: Request, res: Response) {
+      try {
+        const listId = req.params.listId;
+        const serviceResponse = await ListService.deleteList(listId);
+        handleServiceResponse(serviceResponse, res);
+      } catch (error) {
+        const errorMessage = `Error deleting list: ${(error as Error).message}`;
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          status: ResponseStatus.Failed,
+          message: errorMessage,
+          data: null,
+        });
+      }
+      
+    },
+  
+    async restoreList(req: Request, res: Response) {
+      try {
+        const listId = req.params.listId;
+        const serviceResponse = await ListService.restoreList(listId);
+        handleServiceResponse(serviceResponse, res);
+      } catch (error) {
+        const errorMessage = `Error deleting list: ${(error as Error).message}`;
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          status: ResponseStatus.Failed,
+          message: errorMessage,
+          data: null,
+        });
+      }
+      
+    },
   async createCard(req: AuthenticatedRequest, res: Response) {
     const listId: string | any = req.params.listId;
     const cardData: Cards = req.body;

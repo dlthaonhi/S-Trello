@@ -8,8 +8,8 @@ projectRouter.post("/create", authenticateJWT, ProjectController.createProject);
 projectRouter.put("/update/:projectId", authenticateJWT, ProjectController.updateProject);
 projectRouter.patch("/archive/:projectId", authenticateJWT, ProjectController.archiveProject);
 projectRouter.patch("/unarchive/:projectId", authenticateJWT, ProjectController.unarchiveProject);
-projectRouter.delete("/:projectId", ProjectController.deleteProject); // Xóa mềm
-projectRouter.patch("/:projectId/restore", ProjectController.restoreProject); // Khôi phục
+projectRouter.delete("/:projectId", ProjectController.deleteProject); 
+projectRouter.patch("/:projectId/restore", ProjectController.restoreProject);
 
 
 projectRouter.post("/member/:projectId", canAccessBy("project","member", "admin"), ProjectController.addMember);

@@ -53,6 +53,37 @@ export const CardController = {
       });
     }
   },
+  async deleteCard(req: Request, res: Response) {
+      try {
+        const cardId = req.params.cardId;
+        const serviceResponse = await CardService.deleteCard(cardId);
+        handleServiceResponse(serviceResponse, res);
+      } catch (error) {
+        const errorMessage = `Error deleting card: ${(error as Error).message}`;
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          status: ResponseStatus.Failed,
+          message: errorMessage,
+          data: null,
+        });
+      }
+      
+    },
+  
+    async restoreCard(req: Request, res: Response) {
+      try {
+        const cardId = req.params.cardId;
+        const serviceResponse = await CardService.restoreCard(cardId);
+        handleServiceResponse(serviceResponse, res);
+      } catch (error) {
+        const errorMessage = `Error deleting card: ${(error as Error).message}`;
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          status: ResponseStatus.Failed,
+          message: errorMessage,
+          data: null,
+        });
+      }
+      
+    },
   async assignMember(req: AuthenticatedRequest, res: Response) {
     try {
       const cardId: string | any = req.params.cardId;

@@ -7,6 +7,8 @@ const cardRouter = Router();
 cardRouter.put("/:cardId", CardController.updateCard);
 cardRouter.patch("/archive/:cardId", CardController.archiveCard);
 cardRouter.patch("/unarchive/:cardId", CardController.unarchiveCard);
+cardRouter.delete("/:cardId", CardController.deleteCard); 
+cardRouter.patch("/:cardId/restore", CardController.restoreCard);
 
 cardRouter.post("/:cardId/assign", CardController.assignMember);
 cardRouter.delete("/:cardId/unassign", CardController.unassignMember);

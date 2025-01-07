@@ -98,6 +98,59 @@ export const CardService = {
       );
     }
   },
+   async deleteCard(id: string): Promise<ServiceResponse<null>> {
+      try {
+        const result = await cardRepository.softDelete(id);
+        if (!result.affected) {
+          return new ServiceResponse(
+            ResponseStatus.Failed,
+            "Card not found",
+            null,
+            StatusCodes.NOT_FOUND
+          );
+        }
+        return new ServiceResponse(
+          ResponseStatus.Success,
+          "Card deleted successfully",
+          null,
+          StatusCodes.OK
+        );
+      } catch (error) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          `Error deleting card: ${(error as Error).message}`,
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+    },
+  
+    async restoreCard(id: string): Promise<ServiceResponse<null>> {
+      try {
+        const result = await cardRepository.restore(id);
+        if (!result.affected) {
+          return new ServiceResponse(
+            ResponseStatus.Failed,
+            "Card not found",
+            null,
+            StatusCodes.NOT_FOUND
+          );
+        }
+        return new ServiceResponse(
+          ResponseStatus.Success,
+          "Card restored successfully",
+          null,
+          StatusCodes.OK
+        );
+      } catch (error) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          `Error restoring card: ${(error as Error).message}`,
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+    },
   assignMembers: async (cardId: string, userIds: string[]): Promise<ServiceResponse<CardMembers[] | null>> => {
     try {
       const card = await cardRepository.findByCardIdAndRelationAsync(cardId, ['listID']);

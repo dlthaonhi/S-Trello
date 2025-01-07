@@ -6,6 +6,7 @@ import {
   ManyToOne,
   Int32,
   ManyToMany,
+  DeleteDateColumn,
 } from "typeorm";
 import { DateTimeEntity } from "../base/datetime.entity";
 import { Boards } from "./boards.entity";
@@ -30,4 +31,7 @@ export class Lists extends DateTimeEntity {
 
   @ManyToOne(() => Boards, (boards) => boards.lists)
   public boardID: Boards;
+
+  @DeleteDateColumn()
+      deletedAt?: Date;
 }

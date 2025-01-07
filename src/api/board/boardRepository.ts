@@ -1,43 +1,43 @@
 import dataSource from "../../config/typeorm.config";
-import { DeepPartial } from "typeorm";
+import { DeepPartial, IsNull } from "typeorm";
 import { Boards } from "@/model/projects/boards.entity";
 import { BoardMembers } from "@/model/projects/boardMembers.entity";
 
 export const boardRepository = dataSource.getRepository(Boards).extend({
   async findAllAsync(): Promise<Boards[]> {
-    return this.find();
+    return this.find({ where: { deletedAt: IsNull() } });
   },
 
   async findByIdAsync(id: string): Promise<Boards | null> {
-    return this.findOneBy({ id: id });
+    return this.findOneBy({ id: id, deletedAt: IsNull() });
   },
 
   async findByBoardIdAndRelationAsync(boardId: string, relations: string[]): Promise<Boards | null> {
     return this.findOne({
-      where: {  id: boardId },
+      where: { id: boardId, deletedAt: IsNull() },
       relations: relations,
     });
   },
 
-  async createBoardAsync(newData: Partial<Boards>): Promise<Boards | null > {  
+  async createBoardAsync(newData: Partial<Boards>): Promise<Boards | null> {
     const newBoard = this.create(newData);
     return this.save(newBoard);
   },
 
-  async updateBoardByIdAsync(  
+  async updateBoardByIdAsync(
     id: string,
     updateData: Partial<Boards>
   ): Promise<Boards | null> {
-      await this.save(updateData);
-    return this.findOneBy({id});
+    await this.save(updateData);
+    return this.findOneBy({ id });
   },
 
   async countBoardsByProjectIdAsync(projectId: string): Promise<number> {
-    return this.count({ where: {project: {id: projectId}}})
+    return this.count({ where: { project: { id: projectId } } })
   },
 
   async softDelete(id: string): Promise<any> {
-    return this.softDelete(id); 
+    return this.softDelete(id);
   },
 
   async restore(id: string): Promise<any> {
@@ -53,14 +53,14 @@ export const boardMemberRepository = dataSource.getRepository(BoardMembers).exte
 
   async findAllByBoardIdAsync(boardId: string): Promise<BoardMembers[]> {
     return this.find({
-        where: { boardID: { id: boardId }}
+      where: { boardID: { id: boardId } }
     });
   },
 
   async findAllByBoardIdAndRelationAsync(boardId: string, relations: string[]): Promise<BoardMembers[]> {
     return this.find({
-        where: { boardID: { id: boardId }},
-        relations: relations
+      where: { boardID: { id: boardId } },
+      relations: relations
     });
   },
 
@@ -95,11 +95,11 @@ export const boardMemberRepository = dataSource.getRepository(BoardMembers).exte
     return this.save(newMems);
   },
 
-  async deleteBoardMembersAsync (boardId: string, userId: string): Promise<BoardMembers | null> {
+  async deleteBoardMembersAsync(boardId: string, userId: string): Promise<BoardMembers | null> {
     const removeItem = await this.findOne({
       where: { boardID: { id: boardId }, userID: { id: userId } },
     });
-    if(!removeItem) return null;
+    if (!removeItem) return null;
     return await this.remove(removeItem);
   },
 

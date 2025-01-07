@@ -1,15 +1,15 @@
 import dataSource from "../../config/typeorm.config";
-import { DeepPartial } from "typeorm";
+import { DeepPartial, IsNull } from "typeorm";
 import { Cards } from "@/model/projects/cards.entity";
 import { CardMembers } from "@/model/projects/cardMembers.entity";
 
 export const cardRepository = dataSource.getRepository(Cards).extend({
-//   async findAllAsync(): Promise<Boards[]> {
-//     return this.find();
-//   },
+  async findAllAsync(): Promise<Cards[]> {
+    return this.find({where: {deletedAt: IsNull()}});
+  },
 
   async findByIdAsync(id: string): Promise<Cards | null> {
-    return this.findOneBy({ id: id });
+    return this.findOneBy({ id: id,deletedAt: IsNull() });
   },
 
   async createCardAsync(newData: Partial<Cards>): Promise<Cards | null > {  
@@ -27,19 +27,19 @@ export const cardRepository = dataSource.getRepository(Cards).extend({
 
   async findByCardIdAndRelationAsync(cardId: string, relations: string[]): Promise<Cards | null> {
     return this.findOne({
-      where: {  id: cardId },
+      where: {  id: cardId, deletedAt: IsNull() },
       relations: relations,
     });
   },
 
   async findByListIdAndPositionAsync(listId: string, position: number): Promise<Cards | null> {
     return this.findOne({
-      where: {  listID: {id: listId}, position: position }
+      where: {  listID: {id: listId}, position: position, deletedAt: IsNull() }
     });
   },
 
   async countCardsByListIdAsync(listId: string): Promise<number> {
-    return this.count({ where: {listID: {id: listId}}})
+    return this.count({ where: {listID: {id: listId}, deletedAt: IsNull()}})
   },
 
   async deleteCardAsync (cardId: string): Promise<Cards | null> {
