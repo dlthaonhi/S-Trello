@@ -22,4 +22,44 @@ export const UserController = {
       });
     }
   },
+  async deleteUser(req: Request, res: Response) {
+    const userId = req.params.id;
+    try {
+      const serviceResponse = await UserService.deleteUser(userId);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: `Error deleting user: ${(error as Error).message}`,
+        data: null,
+      });
+    }
+  },
+
+  async restoreUser(req: Request, res: Response) {
+    const userId = req.params.id;
+    try {
+      const serviceResponse = await UserService.restoreUser(userId);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: `Error restoring user: ${(error as Error).message}`,
+        data: null,
+      });
+    }
+  },
+
+  async getActiveUsers(req: Request, res: Response) {
+    try {
+      const serviceResponse = await UserService.getActiveUsers();
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: `Error retrieving active users: ${(error as Error).message}`,
+        data: null,
+      });
+    }
+  },
 };

@@ -45,7 +45,7 @@ export const BoardController = {
     const boardId: string | any = req.params.boardId;
     const value: boolean = false;
     console.log(boardId);
-    
+
     try {
       const serviceResponse = await BoardService.archiveBoard(boardId, value);
       handleServiceResponse(serviceResponse, res);
@@ -58,6 +58,37 @@ export const BoardController = {
       });
     }
   },
+  async deleteBoard(req: Request, res: Response) {
+    try {
+      const boardId = req.params.boardId;
+      const serviceResponse = await BoardService.deleteBoard(boardId);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      const errorMessage = `Error unarchiving board: ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+
+  },
+
+  async restoreBoard(req: Request, res: Response) {
+    try {
+      const boardId = req.params.boardId;
+      const serviceResponse = await BoardService.restoreBoard(boardId);
+      handleServiceResponse(serviceResponse, res);
+    } catch (error) {
+      const errorMessage = `Error unarchiving board: ${(error as Error).message}`;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: ResponseStatus.Failed,
+        message: errorMessage,
+        data: null,
+      });
+    }
+
+  },
   async addMember(req: AuthenticatedRequest, res: Response) {
     // const userId:string | any = req.id;  // for notification api
     try {
@@ -66,7 +97,7 @@ export const BoardController = {
       if (userId == undefined || userId == null)
         throw new Error("Missing some non-nullable field")
       let userIds: string[] = (typeof (userId) == 'string') ? [userId] : userId;
-      if(!userIds.length) 
+      if (!userIds.length)
         throw new Error("Missing userId")
       const serviceResponse = await BoardService.addMembers(boardId, userIds);
       handleServiceResponse(serviceResponse, res);
@@ -86,7 +117,7 @@ export const BoardController = {
       if (userId == undefined || userId == null)
         throw new Error("Missing some non-nullable field")
       let userIds: string[] = (typeof (userId) == 'string') ? [userId] : userId;
-      if(!userIds.length) 
+      if (!userIds.length)
         throw new Error("Missing userId")
       const serviceResponse = await BoardService.removeMembers(boardId, userIds);
       handleServiceResponse(serviceResponse, res);
@@ -102,8 +133,8 @@ export const BoardController = {
     const userId: string | any = req.id;
     const boardId: string | any = req.params.boardId;
     const listData: Lists = req.body;
-    if (!listData.title) 
-      throw new Error ("Missing some non-nullable field")
+    if (!listData.title)
+      throw new Error("Missing some non-nullable field")
     try {
       const serviceResponse = await BoardService.createList(boardId, listData);
       handleServiceResponse(serviceResponse, res);
@@ -121,8 +152,8 @@ export const BoardController = {
     const userId: string | any = req.id;
     const boardId: string | any = req.params.boardId;
     const sortedListIds: string[] = req.body.sortedListIds;
-    if (!sortedListIds) 
-      throw new Error ("Missing some non-nullable field")
+    if (!sortedListIds)
+      throw new Error("Missing some non-nullable field")
     try {
       const serviceResponse = await BoardService.sortList(boardId, sortedListIds);
       handleServiceResponse(serviceResponse, res);

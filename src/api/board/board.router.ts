@@ -7,6 +7,9 @@ const boardRouter = Router();
 boardRouter.put("/:boardId", canAccessBy("board","member", "admin"), BoardController.updateBoard);
 boardRouter.patch("/archive/:boardId", canAccessBy("board","member", "admin"), BoardController.archiveBoard);
 boardRouter.patch("/unarchive/:boardId", canAccessBy("board","member", "admin"), BoardController.unarchiveBoard);
+boardRouter.delete("/:boardId", BoardController.deleteBoard); // Xóa mềm
+boardRouter.patch("/:boardId/restore", BoardController.restoreBoard); // Khôi phục
+
 
 boardRouter.post("/member/:boardId", canAccessBy("board","member", "admin"), BoardController.addMember);
 boardRouter.delete("/member/:boardId",canAccessBy("board", "admin"), BoardController.removeMember);

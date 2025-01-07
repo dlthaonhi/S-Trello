@@ -34,7 +34,15 @@ export const boardRepository = dataSource.getRepository(Boards).extend({
 
   async countBoardsByProjectIdAsync(projectId: string): Promise<number> {
     return this.count({ where: {project: {id: projectId}}})
-  }
+  },
+
+  async softDelete(id: string): Promise<any> {
+    return this.softDelete(id); 
+  },
+
+  async restore(id: string): Promise<any> {
+    return this.restore(id);
+  },
 
 });
 

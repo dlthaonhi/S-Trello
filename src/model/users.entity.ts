@@ -6,16 +6,17 @@ import {
   ManyToOne,
   ManyToMany,
   Int32,
+  DeleteDateColumn,
 } from "typeorm";
 import { DateTimeEntity } from "./base/datetime.entity";
 import { projectMembers } from "./projects/projectMembers.entity";
 import { Comments } from "./projects/comments.entity";
 import { Notifications } from "./projects/notifications.entity";
-import { Roles } from "./roles.entity";
 import { BoardMembers } from "./projects/boardMembers.entity";
 import { CardMembers } from "./projects/cardMembers.entity";
 import { Projects } from "./projects/projects.entity";
 import { Boards } from "./projects/boards.entity";
+import { Templates } from "./projects/templates.entity";
 
 @Entity()
 export class Users extends DateTimeEntity {
@@ -61,6 +62,9 @@ export class Users extends DateTimeEntity {
   @OneToMany(() => Boards, (board) => board.user, {cascade: true})
   boards: Boards[];
 
+  @OneToMany(() => Templates, (template) => template.user, {cascade: true})
+  templates: Templates[];
+
   @OneToMany(() => projectMembers, (projectMembers) => projectMembers.userID, {
     cascade: true,
   })
@@ -77,13 +81,9 @@ export class Users extends DateTimeEntity {
   @OneToMany(() => Notifications, (notifications) => notifications.userID, {cascade: true})
   notifications: Notifications[];
 
-  // @ManyToMany(() => Roles, (role) => role.users, {
-  //   cascade: true,
-  // })
-  // role: Roles[];
-
-
-
   @ManyToOne(() => CardMembers, (cardMembers) => cardMembers.userID)
   cardMembers: CardMembers;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

@@ -100,6 +100,59 @@ export const BoardService = {
       );
     }
   },
+  async deleteBoard(id: string): Promise<ServiceResponse<null>> {
+    try {
+      const result = await boardRepository.softDelete(id);
+      if (!result.affected) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Board not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      }
+      return new ServiceResponse(
+        ResponseStatus.Success,
+        "Board deleted successfully",
+        null,
+        StatusCodes.OK
+      );
+    } catch (error) {
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        `Error deleting board: ${(error as Error).message}`,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
+
+  async restoreBoard(id: string): Promise<ServiceResponse<null>> {
+    try {
+      const result = await boardRepository.restore(id);
+      if (!result.affected) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Board not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      }
+      return new ServiceResponse(
+        ResponseStatus.Success,
+        "Board restored successfully",
+        null,
+        StatusCodes.OK
+      );
+    } catch (error) {
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        `Error restoring board: ${(error as Error).message}`,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
   addMembers: async (boardId: string, userIds: string[]): Promise<ServiceResponse<BoardMembers[] | BoardMembers | null>> => {
     try {
       const board = await boardRepository.findByIdAsync(boardId);

@@ -1,16 +1,18 @@
 import { Projects } from "../../model/projects/projects.entity";
 
 import dataSource from "../../config/typeorm.config";
-import { DeepPartial } from "typeorm";
+import { DeepPartial, IsNull } from "typeorm";
 import { projectMembers } from "@/model/projects/projectMembers.entity";
 
 export const projectRepository = dataSource.getRepository(Projects).extend({
   async findAllAsync(): Promise<Projects[]> {
-    return this.find();
+    return this.find({
+          where: { deletedAt: IsNull() },
+        });
   },
 
   async findByIdAsync(id: string): Promise<Projects | null> {
-    return this.findOneBy({ id: id });
+    return this.findOneBy({ id: id, deletedAt: IsNull()  });
   },
 
   async createProjectAsync(userData: Partial<Projects>): Promise<Projects | null > {  //1
@@ -34,6 +36,15 @@ export const projectRepository = dataSource.getRepository(Projects).extend({
     
       await this.save(updateData);
     return this.findOneBy({id});
+  },
+
+  
+  async softDelete(id: string): Promise<any> {
+    return this.softDelete(id); 
+  },
+
+  async restore(id: string): Promise<any> {
+    return this.restore(id);
   },
 });
 

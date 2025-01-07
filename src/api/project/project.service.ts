@@ -153,6 +153,59 @@ export const ProjectService = {
       );
     }
   },
+  async deleteProject(id: string): Promise<ServiceResponse<null>> {
+    try {
+      const result = await projectRepository.softDelete(id);
+      if (!result.affected) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Project not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      }
+      return new ServiceResponse(
+        ResponseStatus.Success,
+        "Project deleted successfully",
+        null,
+        StatusCodes.OK
+      );
+    } catch (error) {
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        `Error deleting project: ${(error as Error).message}`,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
+
+  async restoreProject(id: string): Promise<ServiceResponse<null>> {
+    try {
+      const result = await projectRepository.restore(id);
+      if (!result.affected) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Project not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      }
+      return new ServiceResponse(
+        ResponseStatus.Success,
+        "Project restored successfully",
+        null,
+        StatusCodes.OK
+      );
+    } catch (error) {
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        `Error restoring project: ${(error as Error).message}`,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
   addMembers: async (projectId: string, userIds: string[]): Promise<ServiceResponse<projectMembers[] | projectMembers | null>> => {
     try {
       const project = await projectRepository.findByIdAsync(projectId);
