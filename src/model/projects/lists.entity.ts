@@ -26,12 +26,15 @@ export class Lists extends DateTimeEntity {
   @Column({ type: "boolean", default: false })
   public is_archive: boolean;
 
-  @OneToMany(() => Cards, (cards) => cards.listID, {cascade: true})
+  @OneToMany(() => Cards, (cards) => cards.listID, { cascade: true })
   public cards: Cards[];
 
   @ManyToOne(() => Boards, (boards) => boards.lists)
   public boardID: Boards;
 
   @DeleteDateColumn()
-      deletedAt?: Date;
+  deletedAt?: Date;
+
+  @Column({ type: "boolean", default: false })
+  public isTemplate: boolean;
 }

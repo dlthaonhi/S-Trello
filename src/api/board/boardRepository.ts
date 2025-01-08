@@ -5,16 +5,16 @@ import { BoardMembers } from "@/model/projects/boardMembers.entity";
 
 export const boardRepository = dataSource.getRepository(Boards).extend({
   async findAllAsync(): Promise<Boards[]> {
-    return this.find({ where: { deletedAt: IsNull() } });
+    return this.find({ where: { deletedAt: IsNull(), isTemplate: false } });
   },
 
   async findByIdAsync(id: string): Promise<Boards | null> {
-    return this.findOneBy({ id: id, deletedAt: IsNull() });
+    return this.findOneBy({ id: id, deletedAt: IsNull(), isTemplate: false });
   },
 
   async findByBoardIdAndRelationAsync(boardId: string, relations: string[]): Promise<Boards | null> {
     return this.findOne({
-      where: { id: boardId, deletedAt: IsNull() },
+      where: { id: boardId, deletedAt: IsNull(), isTemplate: false },
       relations: relations,
     });
   },
@@ -33,7 +33,7 @@ export const boardRepository = dataSource.getRepository(Boards).extend({
   },
 
   async countBoardsByProjectIdAsync(projectId: string): Promise<number> {
-    return this.count({ where: { project: { id: projectId } } })
+    return this.count({ where: { project: { id: projectId, deletedAt: IsNull() } } })
   },
 
   async softDelete(id: string): Promise<any> {
@@ -46,6 +46,35 @@ export const boardRepository = dataSource.getRepository(Boards).extend({
 
 });
 
+
+export const templateBoardRepository = dataSource.getRepository(Boards).extend({
+  async findAllTemplateAsync(): Promise<Boards[]> {
+    return this.find({ where: { deletedAt: IsNull(), isTemplate: true } });
+  },
+
+  async findByTemplateIdAsync(id: string): Promise<Boards | null> {
+    return this.findOneBy({ id: id, deletedAt: IsNull(), isTemplate: true });
+  },
+
+  async findByTemplateIdAndRelationAsync(templateId: string, relations: string[]): Promise<Boards | null> {
+    return this.findOne({
+      where: { id: templateId, deletedAt: IsNull(), isTemplate: true },
+      relations: relations,
+    });
+  },
+
+  async createTemplateAsync (newData: Partial<Boards>): Promise<Boards | null> {
+    const newTemplate = this.create({ ...newData, isTemplate: true, project: null });
+    return this.save(newTemplate);
+  },
+
+  async updateTemplate(id: string, updateData: Partial<Boards>): Promise<Boards | null> {
+    await this.save(updateData);
+    return this.findOneBy({ id });
+  },
+
+});
+
 export const boardMemberRepository = dataSource.getRepository(BoardMembers).extend({
   async findAllAsync(): Promise<BoardMembers[]> {
     return this.find();
@@ -53,13 +82,13 @@ export const boardMemberRepository = dataSource.getRepository(BoardMembers).exte
 
   async findAllByBoardIdAsync(boardId: string): Promise<BoardMembers[]> {
     return this.find({
-      where: { boardID: { id: boardId } }
+      where: { boardID: { id: boardId, deletedAt: IsNull()} }
     });
   },
 
   async findAllByBoardIdAndRelationAsync(boardId: string, relations: string[]): Promise<BoardMembers[]> {
     return this.find({
-      where: { boardID: { id: boardId } },
+      where: { boardID: { id: boardId, deletedAt: IsNull() } },
       relations: relations
     });
   },
@@ -69,19 +98,19 @@ export const boardMemberRepository = dataSource.getRepository(BoardMembers).exte
   },
 
   async findByBoardIdAsync(boardId: string): Promise<BoardMembers | null> {
-    return this.findOneBy({ boardID: { id: boardId } });
+    return this.findOneBy({ boardID: { id: boardId, deletedAt: IsNull() } });
   },
 
   async findByBoardIdAndRelationAsync(boardId: string, relations: string[]): Promise<BoardMembers | null> {
     return this.findOne({
-      where: { boardID: { id: boardId } },
+      where: { boardID: { id: boardId, deletedAt: IsNull() } },
       relations: relations,
     });
   },
 
   async findByBoardAndUserIdAsync(boardId: string, userId: string): Promise<BoardMembers | null> {
     return this.findOne({
-      where: { boardID: { id: boardId }, userID: { id: userId } },
+      where: { boardID: { id: boardId, deletedAt: IsNull() }, userID: { id: userId, deletedAt: IsNull() } },
     });
   },
 
@@ -97,7 +126,7 @@ export const boardMemberRepository = dataSource.getRepository(BoardMembers).exte
 
   async deleteBoardMembersAsync(boardId: string, userId: string): Promise<BoardMembers | null> {
     const removeItem = await this.findOne({
-      where: { boardID: { id: boardId }, userID: { id: userId } },
+      where: { boardID: { id: boardId, deletedAt: IsNull() }, userID: { id: userId, deletedAt: IsNull() } },
     });
     if (!removeItem) return null;
     return await this.remove(removeItem);

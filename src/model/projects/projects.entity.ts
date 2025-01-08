@@ -31,12 +31,12 @@ export class Projects extends DateTimeEntity {
   @Column({ type: "boolean", default: false })
   public is_archive: boolean;
 
-  @OneToMany(() => projectMembers, (projectMembers) => projectMembers.projectID, {cascade: true})
+  @OneToMany(() => projectMembers, (projectMembers) => projectMembers.projectID, { cascade: true })
   projectMembers: projectMembers[];
 
   @OneToMany(() => Boards, (boards) => boards.project)
   boards: Boards[];
 
   @DeleteDateColumn()
-    deletedAt?: Date;
+  deletedAt?: Date;
 }

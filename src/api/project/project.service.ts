@@ -13,7 +13,10 @@ import { type } from "os";
 import { IsNull } from "typeorm";
 import { Boards } from "@/model/projects/boards.entity";
 import { BoardMembers } from "@/model/projects/boardMembers.entity";
-import { boardMemberRepository, boardRepository } from "../board/boardRepository";
+import { boardMemberRepository, boardRepository, templateBoardRepository } from "../board/boardRepository";
+import { listRepository } from "../list/listRepository";
+import { Lists } from "@/model/projects/lists.entity";
+import { cardRepository } from "../card/cardRepository";
 
 export const ProjectService = {
   createProject: async (userId: string, projectData: Projects): Promise<ServiceResponse<Projects | null>> => {
@@ -179,7 +182,6 @@ export const ProjectService = {
       );
     }
   },
-
   async restoreProject(id: string): Promise<ServiceResponse<null>> {
     try {
       const result = await projectRepository.restore(id);
@@ -428,6 +430,78 @@ export const ProjectService = {
       return new ServiceResponse(
         ResponseStatus.Failed,
         errorMessage,
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  },
+  async createBoardFromTemplate(userId: string, templateId: string, projectId: string, boardData: Boards): Promise<ServiceResponse<Boards | null>> {
+    try {
+      // Lấy thông tin template
+      const template = await templateBoardRepository.findByTemplateIdAndRelationAsync(templateId, ['lists', 'lists.cards']);
+      if (!template) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Template not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      }
+
+      // Tạo board mới
+      const newBoard = await boardRepository.createBoardAsync({
+        ...boardData,
+        title: boardData.title || `Copy of ${template.title}`,
+        isTemplate: false, // Board mới không phải là template
+      });
+
+      if (!newBoard) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          "Error creating board",
+          null,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      // Lists
+      const newLists: Partial<Lists>[] = template.lists.map(list => ({
+        ...list,
+        boardID: newBoard,
+        isTemplate: false,
+        cards: list.cards.map(card => ({
+          ...card,
+          isTemplate: false
+        })),
+      }));
+      for (const list of newLists) {
+        const createdList = await listRepository.createListAsync(list);
+        if (!createdList) {
+          return new ServiceResponse(
+            ResponseStatus.Failed,
+            "Error creating list",
+            null,
+            StatusCodes.INTERNAL_SERVER_ERROR
+          );
+        }
+        if (list.cards && list.cards.length) {
+          for (const card of list.cards) {
+            card.listID = createdList;
+            await cardRepository.createCardAsync(card);
+          }
+        }
+      }
+
+      return new ServiceResponse(
+        ResponseStatus.Success,
+        "Board created from template successfully",
+        newBoard,
+        StatusCodes.CREATED
+      );
+    } catch (error) {
+      return new ServiceResponse(
+        ResponseStatus.Failed,
+        `Error creating board from template: ${(error as Error).message}`,
         null,
         StatusCodes.INTERNAL_SERVER_ERROR
       );

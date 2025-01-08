@@ -39,18 +39,21 @@ export class Cards extends DateTimeEntity {
   @Column({ type: "datetime", nullable: true })
   public dueDate: Date;
 
-  @Column({ type:"boolean", default: false })
+  @Column({ type: "boolean", default: false })
   public is_archive: boolean;
 
-  @OneToMany(() => Comments, (comments) => comments.cardID, {cascade: true})
+  @OneToMany(() => Comments, (comments) => comments.cardID, { cascade: true })
   public comments: Comments[];
 
-  @OneToMany(() => CardMembers, (cardMembers) => cardMembers.cardID, {cascade: true})
+  @OneToMany(() => CardMembers, (cardMembers) => cardMembers.cardID, { cascade: true })
   public cardMembers: CardMembers[];
 
   @ManyToOne(() => Lists, (lists) => lists.cards)
   public listID: Lists;
 
   @DeleteDateColumn()
-    deletedAt?: Date;
+  deletedAt?: Date;
+
+  @Column({ type: "boolean", default: false })
+  public isTemplate: boolean;
 }
