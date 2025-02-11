@@ -12,6 +12,7 @@ export const cardRepository = dataSource.getRepository(Cards).extend({
     return this.findOneBy({ id: id,deletedAt: IsNull() });
   },
 
+
   async createCardAsync(newData: Partial<Cards>): Promise<Cards | null > {  
     const newCard = this.create(newData);
     return this.save(newCard);

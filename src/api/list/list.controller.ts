@@ -8,6 +8,7 @@ import { Boards } from "@/model/projects/boards.entity";
 import { Lists } from "@/model/projects/lists.entity";
 import { Cards } from "@/model/projects/cards.entity";
 
+
 export const ListController = {
   async updateList(req: AuthenticatedRequest, res: Response) {
     // const userId:string | any = req.id;  // for notification api
@@ -106,5 +107,6 @@ export const ListController = {
       });
     }
   },
+
 
 };

@@ -43,7 +43,6 @@ export const boardRepository = dataSource.getRepository(Boards).extend({
   async restore(id: string): Promise<any> {
     return this.restore(id);
   },
-
 });
 
 export const boardMemberRepository = dataSource.getRepository(BoardMembers).extend({

@@ -133,7 +133,8 @@ export const BoardController = {
     const userId: string | any = req.id;
     const boardId: string | any = req.params.boardId;
     const listData: Lists = req.body;
-    if (!listData.title)
+
+    if (!listData.title) 
       throw new Error("Missing some non-nullable field")
     try {
       const serviceResponse = await BoardService.createList(boardId, listData);
@@ -154,6 +155,7 @@ export const BoardController = {
     const sortedListIds: string[] = req.body.sortedListIds;
     if (!sortedListIds)
       throw new Error("Missing some non-nullable field")
+
     try {
       const serviceResponse = await BoardService.sortList(boardId, sortedListIds);
       handleServiceResponse(serviceResponse, res);

@@ -39,6 +39,7 @@ app.use("/list", listRouter);
 app.use("/card", cardRouter);
 app.use("/comment", commentRouter);
 
+
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });

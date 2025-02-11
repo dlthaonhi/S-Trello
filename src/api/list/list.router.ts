@@ -11,4 +11,5 @@ listRouter.delete("/:listId", ListController.deleteList);
 listRouter.patch("/:listId/restore", ListController.restoreList);
 
 listRouter.post("/:listId/card",canAccessBy("list","member", "admin"), ListController.createCard)
+
 export default listRouter;
