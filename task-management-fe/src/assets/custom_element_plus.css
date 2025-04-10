@@ -1,0 +1,23 @@
+.no-header-dialog .el-dialog__header {
+  display: none;
+}
+.dialog-detail-card.el-dialog {
+  width: 100%;
+  max-width: 768px;
+}
+.el-overlay {
+  margin: 0 !important;
+}
+@media screen and (max-width: 768px) {
+  .dialog-detail-card.el-dialog {
+    width: calc(100% - 20px);
+  }
+}
+
+.avatar-user-tooltip {
+  cursor: pointer;
+  filter: blur(0.2px);
+}
+.avatar-user-tooltip:hover {
+  filter: blur(0);
+}

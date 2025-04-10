@@ -1,0 +1,17 @@
+@import './normalize.css';
+@import './base.css';
+@import './custom_element_plus.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#app {
+  min-height: 100vh;
+}
+.header-popover .el-popper__arrow {
+  display: none;
+}
+.form-required {
+  margin-left: 2px;
+  color: #e34935;
+}
